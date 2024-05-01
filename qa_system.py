@@ -6,9 +6,9 @@ client = OpenAI(
     api_key="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",
 )
 
-userInput = "저는 甲대학병원에서 전공의 과정을 밟고 있는 레지던트입니다. 그런데 몇 달 전부터 저에 대한 임금이 지급되지 않고 있어 병원측에 그 지급을 요구하였으나, 병원측은 레지던트 과정도 교육의 과정이므로 임금을 지급하지 않아도 되며 그 전에 얼마씩 지급한 것도 장학금 내지 생활비조로 병원측에서 호의적으로 지급한 것이었다고 말하고 있습니다. 저는 계속 이를 다투었다가는 장래에 좋지 않은 영향을 줄 것도 같아 어떻게 하여야 할지 모르겠습니다. 좋은 방법이 있는지요?"
-sampleData = similar_precedent.get_similar_precedent(userInput)
-print(sampleData)
+userInput = "공무원의 불법행위로 손해를 입은 피해자의 국가배상청구권의 소멸시효 기간이 지났으나 국가가 소멸시효 완성을 주장하는 것이 신의성실의 원칙에 반하는 권리남용으로 허용될 수 없어 배상 책임을 이행한 경우에는 소멸시효 완성 주장이 권리남용에 해당하게 된 원인 행위와 관련하여 공무원이 원인이 되는 행위를 적극적으로 주도하였다는 등의 특별한 사정이 없는 한 국가가 공무원에게 구상권을 행사하는 것은 신의칙상 허용되지 않는 것인지요"
+similarData = similar_precedent.get_similar_precedent(userInput)
+print(f'>>> Similar precedent data: {similarData}')
 
 print(">>> GPT generating...")
 chat_completion = client.chat.completions.create(
@@ -26,20 +26,31 @@ chat_completion = client.chat.completions.create(
         },
         {
             "role" : "system",
+            # "content" : f"""
+            # Here is a info of relevant case law:
+            #     'id': {similarData['판례정보일련번호']},
+            #     'caseName': {similarData['사건명']},
+            #     'caseNumber': {similarData['사건번호']},
+            #     'sentenceDate': {similarData['선고일자']},
+            #     'sentence': {similarData['선고']},
+            #     'courtName': {similarData['법원명']},
+            #     'judgementType': {similarData['판결유형']},
+            #     'decision': {similarData['판시사항']},
+            #     'judgementSummary': {similarData['판결요지']},
+            #     'referenceArticles': {similarData['참조조문']},
+            #     'referencePrecedents': {similarData['참조판례']},
+            #     'fullText': {similarData['전문']}
+            #     """,
             "content" : f"""
             Here is a info of relevant case law:
-                'id': {sampleData['판례정보일련번호']},
-                'caseName': {sampleData['사건명']},
-                'caseNumber': {sampleData['사건번호']},
-                'sentenceDate': {sampleData['선고일자']},
-                'sentence': {sampleData['선고']},
-                'courtName': {sampleData['법원명']},
-                'judgementType': {sampleData['판결유형']},
-                'decision': {sampleData['판시사항']},
-                'judgementSummary': {sampleData['판결요지']},
-                'referenceArticles': {sampleData['참조조문']},
-                'referencePrecedents': {sampleData['참조판례']},
-                'fullText': {sampleData['전문']}
+                'caseName': {similarData['사건명']},
+                'sentence': {similarData['선고']},
+                'judgementType': {similarData['판결유형']},
+                'decision': {similarData['판시사항']},
+                'judgementSummary': {similarData['판결요지']},
+                'referenceArticles': {similarData['참조조문']},
+                'referencePrecedents': {similarData['참조판례']},
+                'fullText': {similarData['전문']}
                 """
         },
         {
