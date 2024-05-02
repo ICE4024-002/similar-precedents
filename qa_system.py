@@ -11,7 +11,7 @@ client = OpenAI(
 
 similarity_threshold = 65
 
-userInput = "형님 부부가 사망하여 10살인 조카의 미성년후견인이 되었습니다 불쌍한 조카를 제 양자로 입양하고 싶은데 어떻게 해야 하나요"
+userInput = "술집에서 시비가 붙어 옆자리 사람과 싸움을 하게 되었습니다 합의를 하고 싶은데 어떻게 해야 하나요"
 similarData, similarity = similar_precedent.get_similar_precedent(userInput)
 print(f'>>> Similar precedent data: {similarData}')
 
@@ -29,6 +29,8 @@ else:
     prompt = {
         "role" : "system",
         "content" : "You are a Korean law expert tasked with providing clear and precise answers to various legal questions."
+                    "First, present caseNumber in info of relevant case law."
+                    "Then, provide a detailed explanation of info of relevant case law according to judgementSummary and fullText in info of relevant case law."
                     "Your responses should always reference specific articles or sections of the law that directly apply to the user's query, ensuring your advice is grounded in relevant legal principles."
                     "For each legal query, carefully analyze any given context or case law to extract pertinent legal precedents and principles."
                     "In responding to the user's query, consider both the general principles of law and any relevant case law or statutes that specifically address the issue at hand."
@@ -43,6 +45,7 @@ similar_data = {
                 Here is a info of relevant case law:
                     'caseName': {similarData['사건명']},
                     'sentence': {similarData['선고']},
+                    'caseNumber': {similarData['사건번호']},
                     'judgementType': {similarData['판결유형']},
                     'decision': {similarData['판시사항']},
                     'judgementSummary': {similarData['판결요지']},
