@@ -15,16 +15,27 @@ userInput = "형님 부부가 사망하여 10살인 조카의 미성년후견인
 similarData, similarity = similar_precedent.get_similar_precedent(userInput)
 print(f'>>> Similar precedent data: {similarData}')
 
-prompt = {
-    "role" : "system",
-    "content" : "You are a Korean law expert tasked with providing clear and precise answers to various legal questions." 
-                "Your responses should always reference specific articles or sections of the law that directly apply to the user's query, ensuring your advice is grounded in relevant legal principles."
-                "For each legal query, carefully analyze any given context or case law to extract pertinent legal precedents and principles."
-                "In responding to the user's query, consider both the general principles of law and any relevant case law or statutes that specifically address the issue at hand."
-                "Your response should be structured as follows: 'In accordance with Article [number] of [Law Name], your situation is addressed as follows...'."
-                "Ensure your explanation is both comprehensive and accessible to non-expert users."
-                "You must answer in Korean."                         
-}
+prompt = {}
+
+if similarity < similarity_threshold:
+    prompt = {
+        "role" : "system",
+        "content" : "You are a Korean law expert tasked with providing clear and precise answers to various legal questions."
+                    "Create a universal solution for user query and provide guidance in the last line of your answers to contact legal experts for details."
+                    "Ensure your explanation is both comprehensive and accessible to non-expert users."
+                    "You must answer in Korean."
+    }
+else:
+    prompt = {
+        "role" : "system",
+        "content" : "You are a Korean law expert tasked with providing clear and precise answers to various legal questions."
+                    "Your responses should always reference specific articles or sections of the law that directly apply to the user's query, ensuring your advice is grounded in relevant legal principles."
+                    "For each legal query, carefully analyze any given context or case law to extract pertinent legal precedents and principles."
+                    "In responding to the user's query, consider both the general principles of law and any relevant case law or statutes that specifically address the issue at hand."
+                    "Your response should be structured as follows: 'In accordance with Article [number] of [Law Name], your situation is addressed as follows...'."
+                    "Ensure your explanation is both comprehensive and accessible to non-expert users."
+                    "You must answer in Korean."
+    }
 
 similar_data = {
                 "role" : "system",
