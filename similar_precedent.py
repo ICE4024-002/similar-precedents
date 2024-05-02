@@ -65,7 +65,6 @@ def get_similar_precedent(question):
     embeddings = mean_pooling(model_output, encoded_input['attention_mask'])
 
     question_vector = embeddings[0]
-    print(question_vector)
 
     query = text(f"""
     SELECT
@@ -91,4 +90,4 @@ def get_similar_precedent(question):
     print(f'>>> Max similarity: {max_similarity}')
     print(f'>>> Similar Text: {texts[max_similarity_idx]}')
 
-    return data[max_similarity_idx]
+    return data[max_similarity_idx], max_similarity
