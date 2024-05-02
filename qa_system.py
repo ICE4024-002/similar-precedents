@@ -10,56 +10,43 @@ userInput = "공무원의 불법행위로 손해를 입은 피해자의 국가�
 similarData = similar_precedent.get_similar_precedent(userInput)
 print(f'>>> Similar precedent data: {similarData}')
 
-print(">>> GPT generating...")
-chat_completion = client.chat.completions.create(
-    messages=[
-        {
-            "role" : "system",
-            "content" : "You are a Korean law expert tasked with providing clear and precise answers to various legal questions." 
-                        "Your responses should always reference specific articles or sections of the law that directly apply to the user's query, ensuring your advice is grounded in relevant legal principles."
-                        "For each legal query, carefully analyze any given context or case law to extract pertinent legal precedents and principles."
-                        "In responding to the user's query, consider both the general principles of law and any relevant case law or statutes that specifically address the issue at hand."
-                        "Your response should be structured as follows: 'In accordance with Article [number] of [Law Name], your situation is addressed as follows...'."
-                        "Ensure your explanation is both comprehensive and accessible to non-expert users."
-                        "You must answer in Korean."
-                        
-        },
-        {
-            "role" : "system",
-            # "content" : f"""
-            # Here is a info of relevant case law:
-            #     'id': {similarData['판례정보일련번호']},
-            #     'caseName': {similarData['사건명']},
-            #     'caseNumber': {similarData['사건번호']},
-            #     'sentenceDate': {similarData['선고일자']},
-            #     'sentence': {similarData['선고']},
-            #     'courtName': {similarData['법원명']},
-            #     'judgementType': {similarData['판결유형']},
-            #     'decision': {similarData['판시사항']},
-            #     'judgementSummary': {similarData['판결요지']},
-            #     'referenceArticles': {similarData['참조조문']},
-            #     'referencePrecedents': {similarData['참조판례']},
-            #     'fullText': {similarData['전문']}
-            #     """,
-            "content" : f"""
-            Here is a info of relevant case law:
-                'caseName': {similarData['사건명']},
-                'sentence': {similarData['선고']},
-                'judgementType': {similarData['판결유형']},
-                'decision': {similarData['판시사항']},
-                'judgementSummary': {similarData['판결요지']},
-                'referenceArticles': {similarData['참조조문']},
-                'referencePrecedents': {similarData['참조판례']},
-                'fullText': {similarData['전문']}
-                """
-        },
-        {
-            "role": "user",
-            "content": f"{userInput}",
-        }
-    ],
-    model="gpt-3.5-turbo",
-    temperature=0
-)
+prompt = {
+    "role" : "system",
+    "content" : "You are a Korean law expert tasked with providing clear and precise answers to various legal questions." 
+                "Your responses should always reference specific articles or sections of the law that directly apply to the user's query, ensuring your advice is grounded in relevant legal principles."
+                "For each legal query, carefully analyze any given context or case law to extract pertinent legal precedents and principles."
+                "In responding to the user's query, consider both the general principles of law and any relevant case law or statutes that specifically address the issue at hand."
+                "Your response should be structured as follows: 'In accordance with Article [number] of [Law Name], your situation is addressed as follows...'."
+                "Ensure your explanation is both comprehensive and accessible to non-expert users."
+                "You must answer in Korean."                         
+}
 
-print(chat_completion.choices[0].message.content)
+similar_data = {
+                "role" : "system",
+                "content" : f"""
+                Here is a info of relevant case law:
+                    'caseName': {similarData['사건명']},
+                    'sentence': {similarData['선고']},
+                    'judgementType': {similarData['판결유형']},
+                    'decision': {similarData['판시사항']},
+                    'judgementSummary': {similarData['판결요지']},
+                    'referenceArticles': {similarData['참조조문']},
+                    'referencePrecedents': {similarData['참조판례']},
+                    'fullText': {similarData['전문']}
+                    """
+}
+
+userInput = {
+                "role": "user",
+                "content": f"{userInput}",
+}
+
+for i in range(1):
+    print(">>> GPT generating...")
+    chat_completion = client.chat.completions.create(
+        messages=[prompt, similar_data, userInput],
+        model="gpt-3.5-turbo",
+        temperature=0
+    )
+
+    print(chat_completion.choices[0].message.content)
