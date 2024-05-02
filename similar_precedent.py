@@ -1,10 +1,10 @@
 import torch
-import pandas as pd
 from tqdm import tqdm
 from sqlalchemy import create_engine
 from sqlalchemy import text
-from transformers import AutoModel, AutoTokenizer
+from transformers import AutoModel, AutoTokenizer 
 from datasets import load_dataset
+
 
 dataset_id ="joonhok-exo-ai/korean_law_open_data_precedents"
 dataset = load_dataset(dataset_id)
@@ -12,13 +12,13 @@ data = dataset['train']
 summary = data['판결요지']
 full_text = data['전문']
 
-texts = []
+texts = [] 
 for i in tqdm(range(len(data))):
   texts.append(summary[i] if summary[i] is not None else full_text[i])
 
 print('>>> Precedent Texts loaded!')
 
-engine = create_engine('postgresql://leeeeeyeon:1234@localhost:5432/postgres')
+engine = create_engine('postgresql://song-yeonghyun:1234@localhost:5432/postgres')
 connection = engine.connect()
 print(">>> Connection established successfully!")
 
