@@ -12,7 +12,7 @@ client = OpenAI(
 
 similarity_threshold = 65
 
-userInput = "술집에서 시비가 붙어 옆자리 사람과 싸움을 하게 되었습니다 합의를 하고 싶은데 어떻게 해야 하나요"
+question = "술집에서 시비가 붙어 옆자리 사람과 싸움을 하게 되었습니다 합의를 하고 싶은데 어떻게 해야 하나요"
 similarData, similarity = similar_precedent.get_similar_precedent(userInput)
 print(f'>>> Similar precedent data: {similarData}')
 
@@ -58,10 +58,13 @@ similar_data = {
 
 userInput = {
                 "role": "user",
-                "content": f"{userInput}",
+                "content": f"{question}",
 }
 
-for i in range(1):
+bottom_datas = pd.read_csv('./bottom_similarites.csv')
+
+for i in range(0, len(bottom_datas)):
+
     messages_list = []
     if similarity < similarity_threshold:
         messages_list = [prompt, userInput]
