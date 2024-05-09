@@ -88,6 +88,5 @@ def get_similar_precedent(question):
     data = dataset['train']
 
     print(f'>>> Max similarity: {max_similarity}')
-    print(f'>>> Similar Text: {texts[max_similarity_idx]}')
 
     return data[max_similarity_idx], max_similarity
