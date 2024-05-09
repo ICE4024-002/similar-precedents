@@ -78,23 +78,10 @@ for i in tqdm(range(0, len(qa_vectors_list))):
         else:
             heapq.heappushpop(bottom_similarity_heap, (-max_similarity, qa_questions.iloc[i]["question"], texts[max_similarity_idx]))
 
-        if len(top_similarity_heap) < heap_size:
-            heapq.heappush(top_similarity_heap, (-max_similarity, qa_questions.iloc[i]["question"], texts[i]))
-        else:
-            heapq.heappushpop(top_similarity_heap, (-max_similarity, qa_questions.iloc[i]["question"], texts[i]))
-
-        if len(similarity_heap) < heap_size:
-            heapq.heappush(similarity_heap, (-max_similarity, qa_questions.iloc[i]["question"], texts[i]))
-        else:
-            heapq.heappushpop(similarity_heap, (-max_similarity, qa_questions.iloc[i]["question"], texts[i]))
-
 bottom_similarities = sorted(bottom_similarity_heap, key=lambda x: -x[0])  # 하위 5개에 대한 결과 정렬
-top_similarities = sorted(top_similarity_heap, key=lambda x: -x[0])
 
 # CSV 파일 경로 설정
 bottom_csv_file_path = "./bottom_similarities.csv"
-top_csv_file_path = "./top_similarities.csv"
-csv_file_path = "./similarities.csv"
 
 # CSV 파일에 쓰기
 with open(bottom_csv_file_path, mode='w', newline='', encoding='utf-8') as file:
@@ -105,21 +92,3 @@ with open(bottom_csv_file_path, mode='w', newline='', encoding='utf-8') as file:
     for similarity, question, text in bottom_similarities:
         writer.writerow([-similarity, question, text])
 print(f">>> 65 이상 유사도를 가진 하위 10개 결과 저장 완료")
-
-with open(top_csv_file_path, mode='w', newline='', encoding='utf-8') as file:
-    writer = csv.writer(file)
-    # 헤더 쓰기
-    writer.writerow(['Similarity', 'Question', 'Text'])
-    # 결과 쓰기
-    for similarity, question, text in top_similarities:
-        writer.writerow([-similarity, question, text])
-print(f">>> 65 이상 유사도를 가진 상위 10개 결과 저장 완료")
-
-with open(csv_file_path, mode='w', newline='', encoding='utf-8') as file:
-    writer = csv.writer(file)
-    # 헤더 쓰기
-    writer.writerow(['Similarity', 'Question', 'Text'])
-    # 결과 쓰기
-    for similarity, question, text in similarity_heap:
-        writer.writerow([-similarity, question, text])
-print(f">>> 65 이상 유사도를 가진 결과 저장 완료")

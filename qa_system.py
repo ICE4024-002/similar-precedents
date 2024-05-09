@@ -1,6 +1,7 @@
 from openai import OpenAI
 import similar_precedent
 import os
+import pandas as pd
 
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
