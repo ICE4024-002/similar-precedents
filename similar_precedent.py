@@ -61,3 +61,10 @@ def get_similar_precedent(data, result_embeddings, question):
     # print(f'>>> Max similarity: {max_similarity}')
 
     return data[max_similarity_idx], max_similarity
+
+def get_similar_precedent_total(data, result_embeddings, question_vector):
+    similarities = cal_score(question_vector.unsqueeze(0), result_embeddings)
+    max_similarity = similarities.max().item()
+    max_similarity_idx = similarities.argmax().item()
+
+    return data[max_similarity_idx], max_similarity

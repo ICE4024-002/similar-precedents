@@ -41,11 +41,11 @@ print(">>> Precedent Embeddings Loaded successfully!")
 
 similarity_threshold = 65
 
-total_datas = pd.read_csv('./result-csv/total_similarities.csv')
+total_datas = pd.read_csv('./csv/result-csv/total_similarities.csv')
 
 total_answers = []
 
-question_vectors = pd.read_csv('./qa-csv/embedded_question_data_spell_ko_sbert_multitask.csv')
+question_vectors = pd.read_csv('./csv/qa-csv/embedded_question_data_spell_ko_sbert_multitask.csv')
 question_vectors_list = []
 for i in tqdm(range(0, len(question_vectors))):
     qa_vector = []
@@ -88,9 +88,6 @@ def process_data(i):
                     "content" : f"""
                     Here is a info of relevant case law:
                         'caseName': {similarData['사건명']},
-                        'sentence': {similarData['선고']},
-                        'caseNumber': {similarData['사건번호']},
-                        'judgementType': {similarData['판결유형']},
                         'decision': {similarData['판시사항']},
                         'judgementSummary': {similarData['판결요지']},
                         'referenceArticles': {similarData['참조조문']},
@@ -119,22 +116,28 @@ def process_data(i):
         )
 
         return [i, similarity, question, chat_completion.choices[0].message.content]
-    except:
+    except Exception as e:
+        print(f"Error: {e}")
+
         global cnt
         cnt += 1
+        failed_questions_idx.append([i, messages_list])
 
 total_answers = []
+failed_questions_idx = []
 cnt = 0 # 답변 생성 불가 횟수
 
 # 병렬 처리를 위해 ThreadPoolExecutor를 사용
 with concurrent.futures.ThreadPoolExecutor() as executor:
     results = list(tqdm(executor.map(process_data, range(0, len(total_datas))), total=len(total_datas)))
+    # results = list(tqdm(executor.map(process_data, range(0, 100)), total=100))
+print(f">>> {cnt} answers failed to generate!")
 
 # 결과를 total_answers 리스트에 추가
 total_answers.extend(results)
-qa_datas = pd.read_csv('./qa-csv/total_qa_spell_checked.csv')
+qa_datas = pd.read_csv('./csv/qa-csv/total_qa_spell_checked.csv')
 
-total_csv_file_path = "./result-csv/total_answers.csv"
+total_csv_file_path = './csv/result-csv/total_answers.csv'
 with open(total_csv_file_path, mode='w', newline='', encoding='utf-8') as file:
     writer = csv.writer(file)
     # 헤더 쓰기
@@ -143,3 +146,13 @@ with open(total_csv_file_path, mode='w', newline='', encoding='utf-8') as file:
     for idx, similarity, question, gpt_answer in total_answers:
         writer.writerow([similarity, question, gpt_answer, qa_datas.iloc[total_datas.iloc[idx]["Question Index"]]['answer']])
 print(f">>> GPT-3.5 Turbo generated answers saved in {total_csv_file_path}!")
+
+print(f'>>> Failed questions index: {failed_questions_idx}')
+failed_questions_csv_file_path = './csv/result-csv/failed_questions.csv'
+with open(failed_questions_csv_file_path, mode='w', newline='', encoding='utf-8') as file:
+    writer = csv.writer(file)
+    # 헤더 쓰기
+    writer.writerow(['Index', 'Prompt'])
+    # 결과 쓰기
+    for idx, prompt in failed_questions_idx:
+        writer.writerow([idx, prompt])
