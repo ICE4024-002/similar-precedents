@@ -6,12 +6,12 @@ os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 client = OpenAI(
     # This is the default and can be omitted
-    api_key="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",
+    api_key="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",
 )
 
 similarity_threshold = 65
 
-userInput = "술집에서 시비가 붙어 옆자리 사람과 싸움을 하게 되었습니다 합의를 하고 싶은데 어떻게 해야 하나요"
+userInput = "매매의 목적물이 화재로 소실됨으로써 매도인의 매매 목적물 인도 의무가 이행 불능일 경우 매수인이 화재사고로 매도인이 지급받게 되는 화재보험금 화재공제금 전부에 대하여 대상청구권을 행사할 수 있나요?"
 similarData, similarity = similar_precedent.get_similar_precedent(userInput)
 print(f'>>> Similar precedent data: {similarData}')
 
@@ -44,9 +44,7 @@ similar_data = {
                 "content" : f"""
                 Here is a info of relevant case law:
                     'caseName': {similarData['사건명']},
-                    'sentence': {similarData['선고']},
                     'caseNumber': {similarData['사건번호']},
-                    'judgementType': {similarData['판결유형']},
                     'decision': {similarData['판시사항']},
                     'judgementSummary': {similarData['판결요지']},
                     'referenceArticles': {similarData['참조조문']},
@@ -70,8 +68,11 @@ for i in range(1):
     print(">>> GPT generating...")
     chat_completion = client.chat.completions.create(
         messages=messages_list,
-        model="gpt-3.5-turbo",
+        model="gpt-4o",
         temperature=0
     )
 
     print(chat_completion.choices[0].message.content)
+    
+    
+    

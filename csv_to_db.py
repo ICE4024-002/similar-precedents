@@ -15,7 +15,7 @@ for i in tqdm(range(0, len(vectors))):
 
 print('>>> CSV to array complete!')
 
-engine = create_engine('postgresql://leeeeeyeon:1234@localhost:5432/postgres')
+engine = create_engine('postgresql://song-yeonghyun:1234@localhost:5432/postgres')
 connection = engine.connect()
 print('>>> Connection established successfully!')
 
