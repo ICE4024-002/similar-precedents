@@ -9,7 +9,8 @@ from sqlalchemy import create_engine
 from sqlalchemy import text
 from tqdm import tqdm
 from datasets import load_dataset
-
+정연 = 'postgresql://leeeeeyeon:1234@localhost:5432/postgres'
+영현 = 'postgresql://song-yeonghyun:1234@localhost:5432/postgres'
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 client = OpenAI(
@@ -21,7 +22,7 @@ dataset_id ="joonhok-exo-ai/korean_law_open_data_precedents"
 dataset = load_dataset(dataset_id)
 data = dataset['train']
 
-engine = create_engine('postgresql://leeeeeyeon:1234@localhost:5432/postgres')
+engine = create_engine(영현)
 connection = engine.connect()
 print(">>> Connection established successfully!")
 
@@ -114,7 +115,7 @@ def process_data(i):
         # print(">>> GPT generating...")
         chat_completion = client.chat.completions.create(
             messages=messages_list,
-            model="gpt-3.5-turbo",
+            model="gpt-4o",
             temperature=0
         )
 
@@ -126,20 +127,26 @@ def process_data(i):
 total_answers = []
 cnt = 0 # 답변 생성 불가 횟수
 
+# # 병렬 처리를 위해 ThreadPoolExecutor를 사용
+# with concurrent.futures.ThreadPoolExecutor() as executor:
+#     results = list(tqdm(executor.map(process_data, range(0, len(total_datas))), total=len(total_datas)))
+
 # 병렬 처리를 위해 ThreadPoolExecutor를 사용
 with concurrent.futures.ThreadPoolExecutor() as executor:
-    results = list(tqdm(executor.map(process_data, range(0, len(total_datas))), total=len(total_datas)))
+    results = list(tqdm(executor.map(process_data, range(0, 1)), total=1))
+    
+print(results)
 
-# 결과를 total_answers 리스트에 추가
-total_answers.extend(results)
-qa_datas = pd.read_csv('./qa-csv/total_qa_spell_checked.csv')
+# # 결과를 total_answers 리스트에 추가
+# total_answers.extend(results)
+# qa_datas = pd.read_csv('./qa-csv/total_qa_spell_checked.csv')
 
-total_csv_file_path = "./result-csv/total_answers.csv"
-with open(total_csv_file_path, mode='w', newline='', encoding='utf-8') as file:
-    writer = csv.writer(file)
-    # 헤더 쓰기
-    writer.writerow(['Similarity', 'Question', 'GPT Answer', 'Original Answer'])
-    # 결과 쓰기
-    for idx, similarity, question, gpt_answer in total_answers:
-        writer.writerow([similarity, question, gpt_answer, qa_datas.iloc[total_datas.iloc[idx]["Question Index"]]['answer']])
-print(f">>> GPT-3.5 Turbo generated answers saved in {total_csv_file_path}!")
+# total_csv_file_path = "./result-csv/total_answers.csv"
+# with open(total_csv_file_path, mode='w', newline='', encoding='utf-8') as file:
+#     writer = csv.writer(file)
+#     # 헤더 쓰기
+#     writer.writerow(['Similarity', 'Question', 'GPT Answer', 'Original Answer'])
+#     # 결과 쓰기
+#     for idx, similarity, question, gpt_answer in total_answers:
+#         writer.writerow([similarity, question, gpt_answer, qa_datas.iloc[total_datas.iloc[idx]["Question Index"]]['answer']])
+# print(f">>> GPT-3.5 Turbo generated answers saved in {total_csv_file_path}!")

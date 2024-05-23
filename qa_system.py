@@ -10,6 +10,8 @@ from sqlalchemy import text
 from tqdm import tqdm
 from datasets import load_dataset
 
+정연 = 'postgresql://leeeeeyeon:1234@localhost:5432/postgres'
+영현 = 'postgresql://song-yeonghyun:1234@localhost:5432/postgres'
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 client = OpenAI(
@@ -21,7 +23,7 @@ dataset_id ="joonhok-exo-ai/korean_law_open_data_precedents"
 dataset = load_dataset(dataset_id)
 data = dataset['train']
 
-engine = create_engine('postgresql://leeeeeyeon:1234@localhost:5432/postgres')
+engine = create_engine(영현)
 connection = engine.connect()
 print(">>> Connection established successfully!")
 
@@ -57,7 +59,7 @@ print('>>> Qusetion vectors created!')
 def process_data(i):
     question = total_datas.iloc[i]["Question"]
     question_vector = question_vectors_list[i]
-    similarData, similarity = similar_precedent.get_similar_precedent_total(data, result_embeddings, question_vector)
+    similarData, similarity = similar_precedent.get_similar_precedent(data, result_embeddings, question_vector)
 
     prompt = {}
 
