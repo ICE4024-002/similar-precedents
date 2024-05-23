@@ -1,14 +1,13 @@
+from openai import OpenAI
 import similar_precedent
 import os
 import pandas as pd
 import csv
-import torch
-import concurrent.futures
-from openai import OpenAI
-from sqlalchemy import create_engine
-from sqlalchemy import text
 from tqdm import tqdm
 from datasets import load_dataset
+import torch
+from sqlalchemy import create_engine
+from sqlalchemy import text
 
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
