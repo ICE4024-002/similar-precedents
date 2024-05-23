@@ -4,9 +4,9 @@ from sqlalchemy import create_engine
 from sqlalchemy import text
 from transformers import AutoModel, AutoTokenizer
 
-정연 = 'postgresql://leeeeeyeon:1234@localhost:5432/postgres'
-영현 = 'postgresql://song-yeonghyun:1234@localhost:5432/postgres'
-engine = create_engine(영현)
+leeeeeyeon = 'leeeeeyeon'
+yeonghyun = 'song-yeonghyun'
+engine = create_engine(f'postgresql://{leeeeeyeon}:1234@localhost:5432/postgres')
 connection = engine.connect()
 print(">>> Connection established successfully!")
 
