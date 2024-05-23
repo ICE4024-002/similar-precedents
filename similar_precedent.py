@@ -4,9 +4,9 @@ from sqlalchemy import create_engine
 from sqlalchemy import text
 from transformers import AutoModel, AutoTokenizer
 
-정연 = 'postgresql://leeeeeyeon:1234@localhost:5432/postgres'
-영현 = 'postgresql://song-yeonghyun:1234@localhost:5432/postgres'
-engine = create_engine(영현)
+leeeeeyeon = 'leeeeeyeon'
+yeonghyun = 'song-yeonghyun'
+engine = create_engine(f'postgresql://{yeonghyun}:1234@localhost:5432/postgres')
 connection = engine.connect()
 print(">>> Connection established successfully!")
 
@@ -59,5 +59,12 @@ def get_similar_precedent(data, result_embeddings, question):
     max_similarity_idx = similarities.argmax().item()
 
     # print(f'>>> Max similarity: {max_similarity}')
+
+    return data[max_similarity_idx], max_similarity
+
+def get_similar_precedent_total(data, result_embeddings, question_vector):
+    similarities = cal_score(question_vector.unsqueeze(0), result_embeddings)
+    max_similarity = similarities.max().item()
+    max_similarity_idx = similarities.argmax().item()
 
     return data[max_similarity_idx], max_similarity

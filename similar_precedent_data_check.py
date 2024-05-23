@@ -58,9 +58,8 @@ result_embeddings = torch.tensor([
     for row in result
 ])
 
-bottom_similarity_heap = []
-top_similarity_heap = []
-similarity_heap = []
+# bottom_similarity_heap = []
+similarity_list = []
 heap_size = 10
 
 for i in tqdm(range(0, len(qa_vectors_list))):
@@ -69,26 +68,33 @@ for i in tqdm(range(0, len(qa_vectors_list))):
     similarities = cal_score(qa_vector.unsqueeze(0), result_embeddings)
 
     max_similarity = similarities.max().item()
+    max_similarity_idx = similarities.argmax().item()
+    
+    similarity_list.append((max_similarity, i, qa_questions.iloc[i]["question"], texts[max_similarity_idx]))
 
-    if max_similarity >= 65:  # 유사도가 65 이상인 결과에 대해서만 처리
-        max_similarity_idx = similarities.argmax().item()
+    # if max_similarity >= 65:  # 유사도가 65 이상인 결과에 대해서만 처리
+    #     max_similarity_idx = similarities.argmax().item()
 
-        if len(bottom_similarity_heap) < heap_size:
-            heapq.heappush(bottom_similarity_heap, (-max_similarity, qa_questions.iloc[i]["question"], texts[max_similarity_idx]))
-        else:
-            heapq.heappushpop(bottom_similarity_heap, (-max_similarity, qa_questions.iloc[i]["question"], texts[max_similarity_idx]))
+        # if len(similarity_list) == 10:
+        #     break
 
-bottom_similarities = sorted(bottom_similarity_heap, key=lambda x: -x[0])  # 하위 5개에 대한 결과 정렬
+#         if len(bottom_similarity_heap) < heap_size:
+#             heapq.heappush(bottom_similarity_heap, (-max_similarity, i, qa_questions.iloc[i]["question"], texts[max_similarity_idx]))
+
+#         else:
+#             heapq.heappushpop(bottom_similarity_heap, (-max_similarity, i, qa_questions.iloc[i]["question"], texts[max_similarity_idx]))
+
+# bottom_similarities = sorted(bottom_similarity_heap, key=lambda x: x[0])
 
 # CSV 파일 경로 설정
-bottom_csv_file_path = "./bottom_similarities.csv"
+csv_file_path = "./result-csv/total_similarities.csv"
 
 # CSV 파일에 쓰기
-with open(bottom_csv_file_path, mode='w', newline='', encoding='utf-8') as file:
+with open(csv_file_path, mode='w', newline='', encoding='utf-8') as file:
     writer = csv.writer(file)
     # 헤더 쓰기
-    writer.writerow(['Similarity', 'Question', 'Text'])
+    writer.writerow(['Similarity', 'Question Index', 'Question', 'Text'])
     # 결과 쓰기
-    for similarity, question, text in bottom_similarities:
-        writer.writerow([-similarity, question, text])
-print(f">>> 65 이상 유사도를 가진 하위 10개 결과 저장 완료")
+    for similarity, i, question, elem in similarity_list:
+        writer.writerow([similarity, i, question, elem])
+print(f">>> CSV 변환 완료")

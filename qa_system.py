@@ -1,14 +1,13 @@
+from openai import OpenAI
 import similar_precedent
 import os
 import pandas as pd
 import csv
-import torch
-import concurrent.futures
-from openai import OpenAI
-from sqlalchemy import create_engine
-from sqlalchemy import text
 from tqdm import tqdm
 from datasets import load_dataset
+import torch
+from sqlalchemy import create_engine
+from sqlalchemy import text
 
 정연 = 'postgresql://leeeeeyeon:1234@localhost:5432/postgres'
 영현 = 'postgresql://song-yeonghyun:1234@localhost:5432/postgres'
@@ -43,23 +42,12 @@ print(">>> Precedent Embeddings Loaded successfully!")
 
 similarity_threshold = 65
 
-total_datas = pd.read_csv('./result-csv/total_similarities.csv')
+top_datas = pd.read_csv('./csv/result-csv/top_similarities.csv')
 
-total_answers = []
-
-question_vectors = pd.read_csv('./qa-csv/embedded_question_data_spell_ko_sbert_multitask.csv')
-question_vectors_list = []
-for i in tqdm(range(0, len(question_vectors))):
-    qa_vector = []
-    for elem in question_vectors.iloc[i]:
-        qa_vector.append(elem)
-    question_vectors_list.append(torch.tensor(qa_vector))
-print('>>> Qusetion vectors created!')
-
-def process_data(i):
-    question = total_datas.iloc[i]["Question"]
-    question_vector = question_vectors_list[i]
-    similarData, similarity = similar_precedent.get_similar_precedent(data, result_embeddings, question_vector)
+top_answers = []
+for i in tqdm(range(0, len(top_datas))):
+    question = top_datas.iloc[i]["Question"]
+    similarData, similarity = similar_precedent.get_similar_precedent(data, result_embeddings, question)
 
     prompt = {}
 
@@ -113,6 +101,7 @@ def process_data(i):
         else:
             messages_list = [prompt, similar_data, userInput]
 
+        print(messages_list)
         # print(">>> GPT generating...")
         chat_completion = client.chat.completions.create(
             messages=messages_list,
@@ -120,28 +109,19 @@ def process_data(i):
             temperature=0
         )
 
-        return [i, similarity, question, chat_completion.choices[0].message.content]
+        top_answers.append([i, similarity, question, chat_completion.choices[0].message.content])
     except:
-        global cnt
-        cnt += 1
+        print(">>> 토큰 수 제한으로 인해 답변 생성 불가")
+        print(messages_list)
 
-total_answers = []
-cnt = 0 # 답변 생성 불가 횟수
+qa_datas = pd.read_csv('./csv/qa-csv/total_qa_spell_checked.csv')
 
-# 병렬 처리를 위해 ThreadPoolExecutor를 사용
-with concurrent.futures.ThreadPoolExecutor() as executor:
-    results = list(tqdm(executor.map(process_data, range(0, len(total_datas))), total=len(total_datas)))
-
-# 결과를 total_answers 리스트에 추가
-total_answers.extend(results)
-qa_datas = pd.read_csv('./qa-csv/total_qa_spell_checked.csv')
-
-total_csv_file_path = "./result-csv/total_answers.csv"
-with open(total_csv_file_path, mode='w', newline='', encoding='utf-8') as file:
+top_csv_file_path = "./csv/result-csv/top_answers.csv"
+with open(top_csv_file_path, mode='w', newline='', encoding='utf-8') as file:
     writer = csv.writer(file)
     # 헤더 쓰기
     writer.writerow(['Similarity', 'Question', 'GPT Answer', 'Original Answer'])
     # 결과 쓰기
-    for idx, similarity, question, gpt_answer in total_answers:
-        writer.writerow([similarity, question, gpt_answer, qa_datas.iloc[total_datas.iloc[idx]["Question Index"]]['answer']])
-print(f">>> GPT-3.5 Turbo generated answers saved in {total_csv_file_path}!")
+    for idx, similarity, question, gpt_answer in top_answers:
+        writer.writerow([similarity, question, gpt_answer, qa_datas.iloc[top_datas.iloc[idx]["Question Index"]]['answer']])
+print(f">>> GPT-3.5 Turbo generated answers saved in {top_csv_file_path}!")
