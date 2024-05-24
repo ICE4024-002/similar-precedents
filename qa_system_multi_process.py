@@ -36,7 +36,7 @@ You must answer in Korean.
 """
 
 low_similarity_prompt = PromptTemplate(input_variables=[], template=low_similarity_template)
-high_similarity_prompt = PromptTemplate(input_variables=["similarData"], template=high_similarity_template)
+high_similarity_prompt = PromptTemplate(input_variables=["similarData", "expertEvaluation"], template=high_similarity_template)
 
 client = OpenAI(
     # This is the default and can be omitted
@@ -84,6 +84,11 @@ def process_data(i):
     question = total_datas.iloc[i]["Question"]
     question_vector = question_vectors_list[i]
     similarData, similarity = similar_precedent.get_similar_precedent_total(data, result_embeddings, question_vector)
+    
+    # 비슷한 질문에 대해 유사도가 90이상인 경우, 전문가 평가를 추가
+    # most_similar_question, expert_evaluation, max_similarity = similar_precedent.get_most_similar_question(question)
+    
+
 
     if similarity < similarity_threshold:
         prompt_content = low_similarity_prompt.format()
@@ -100,7 +105,10 @@ def process_data(i):
             'referencePrecedents': {similarData['참조판례']},
             'fullText': {similarData['전문']}
         """
-        prompt_content = high_similarity_prompt.format(similarData=similar_data_content)
+        
+        # 비슷한 판례와 전문가 평가를 추가
+        prompt_content = high_similarity_prompt.format(similarData=similar_data_content, expertEvaluation="")
+        
 
     user_input = {
         "role": "user",
