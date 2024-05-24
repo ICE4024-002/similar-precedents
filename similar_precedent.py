@@ -104,4 +104,6 @@ def get_similar_precedent_total(data, result_embeddings, question_vector):
 #     most_similar_question = questions[max_similarity_idx]
 #     most_similar_evaluation = evaluation_result_embeddings[max_similarity_idx]
 
+#     if max_similarity < 80:
+#         return None, None, None
 #     return most_similar_question, most_similar_evaluation, max_similarity
