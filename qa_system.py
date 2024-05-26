@@ -53,8 +53,8 @@ def get_gpt_answer_by_precedent(question, similar_precedent, similarity):
             'fullText': {similar_precedent['전문']}
         """
 
-    # 비슷한 판례와 전문가 평가를 추가
-    prompt_content = high_similarity_prompt.format(similarPrecedent=similar_precedent_content, expertEvaluation="")
+        # 비슷한 판례와 전문가 평가를 추가
+        prompt_content = high_similarity_prompt.format(similarPrecedent=similar_precedent_content, expertEvaluation="")
 
     user_input = {
         "role": "user",
