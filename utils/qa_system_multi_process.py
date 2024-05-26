@@ -10,6 +10,7 @@ from sqlalchemy import text
 from tqdm import tqdm
 from datasets import load_dataset
 from langchain.prompts import PromptTemplate
+
 정연 = 'postgresql://leeeeeyeon:1234@localhost:5432/postgres'
 영현 = 'postgresql://song-yeonghyun:1234@localhost:5432/postgres'
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
@@ -87,8 +88,6 @@ def process_data(i):
     
     # 비슷한 질문에 대해 유사도가 90이상인 경우, 전문가 평가를 추가
     # most_similar_question, expert_evaluation, max_similarity = similar_precedent.get_most_similar_question(question)
-    
-
 
     if similarity < similarity_threshold:
         prompt_content = low_similarity_prompt.format()
