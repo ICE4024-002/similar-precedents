@@ -17,7 +17,5 @@ def get_db():
     finally:
         db.close()
 
-@app.post("/qaf/", response_model=schemas.QAF)
-def create_qaf(qaf: schemas.QAFCreate, db: Session = Depends(get_db)):
-    return crud.create_qaf(db=db, qaf=qaf)
 
+# 전문가의 평가를 DB에 저장하는 API@app.post("/feedback/", response_model=schemas.FeedBack)def create_feedback(feedback: schemas.FeedbackCreate, db: Session = Depends(get_db)):    return crud.create_feedback(db=db, feedback=feedback)

@@ -1,9 +1,9 @@
 from sqlalchemy.orm import Session
 from dto.feedback import models, schemas
 
-def create_qaf(db: Session, qaf: schemas.QAFCreate):
-    db_qaf = models.QAF(**qaf.model_dump())
-    db.add(db_qaf)
+def create_feeback(db: Session, feedback: schemas.FeedbackCreate):
+    db_feedback = models.feeback(**feedback.model_dump())
+    db.add(db_feedback)
     db.commit()
-    db.refresh(db_qaf)
-    return db_qaf
+    db.refresh(db_feedback)
+    return db_feedback

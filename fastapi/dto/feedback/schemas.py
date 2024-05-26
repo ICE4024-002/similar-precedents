@@ -1,15 +1,15 @@
 from pydantic import BaseModel
 
-class QAFBase(BaseModel):
+class FeedBackBase(BaseModel):
     question: str
     answer: str
     feedback: str
 
-class QAFCreate(QAFBase):
+class FeedbackCreate(FeedBackBase):
     pass
 
-class QAF(QAFBase):
+class FeedBack(FeedBackBase):
     id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
