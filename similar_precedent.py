@@ -1,5 +1,4 @@
 import torch
-from tqdm import tqdm
 from sqlalchemy import create_engine
 from sqlalchemy import text
 from transformers import AutoModel, AutoTokenizer
