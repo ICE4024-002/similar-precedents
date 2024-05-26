@@ -21,6 +21,3 @@ def get_db():
 def create_qaf(qaf: schemas.QAFCreate, db: Session = Depends(get_db)):
     return crud.create_qaf(db=db, qaf=qaf)
 
-@app.get("/test")
-def test():
-    return {"test": "test"}
