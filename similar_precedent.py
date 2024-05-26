@@ -1,17 +1,5 @@
 import torch
-import os
-from sqlalchemy import create_engine
-from sqlalchemy import text
 from transformers import AutoModel, AutoTokenizer
-from dotenv import load_dotenv
-
-dotenv_path = os.path.join(os.path.dirname(__file__), '.env.local')
-load_dotenv(dotenv_path)
-
-db_url = os.getenv('DB_URL')
-engine = create_engine(db_url)
-connection = engine.connect()
-print(">>> Connection established successfully!")
 
 tokenizer = AutoTokenizer.from_pretrained('jhgan/ko-sbert-multitask')
 model = AutoModel.from_pretrained('jhgan/ko-sbert-multitask')
@@ -26,44 +14,12 @@ def cal_score(a, b):
 
     return torch.mm(a_norm, b_norm.transpose(0, 1)) * 100
 
-max_similarities = []
-query = text(f"""
-SELECT
-    embedding
-FROM
-    ko_sbert_not_processed_precedents;
-""")
-result = connection.execute(query).fetchall()
-
-
-
-result_embeddings = torch.tensor([
-    [float(num_str) for num_str in row[0][1:-1].split(',')]
-    for row in result
-])
-
-print('>>> Precedent tensor vectors created!')
-
-
-# 유사한 질문 및 전문가 평가를 위한 쿼리
-# evaluation_query = text(f"""
-#                         """)
-# evaluation_result = connection.execute(evaluation_query).fetchall()
-
-# evaluation_result_embeddings = torch.tensor([
-#     [float(num_str) for num_str in row[0][1:-1].split(',')]
-#     for row in evaluation_result
-# ])
-
-# questions = [row[1] for row in evaluation_result]
-# expert_evaluations = [row[2] for row in evaluation_result]
-
 def mean_pooling(model_output, attention_mask):
     token_embeddings = model_output[0] #First element of model_output contains all token embeddings
     input_mask_expanded = attention_mask.unsqueeze(-1).expand(token_embeddings.size()).float()
     return torch.sum(token_embeddings * input_mask_expanded, 1) / torch.clamp(input_mask_expanded.sum(1), min=1e-9)
 
-def get_similar_precedent(data, result_embeddings, question):
+def find_similar_precedent(question, data, result_embeddings):
     encoded_input = tokenizer([question], padding=True, truncation=True, return_tensors='pt')
 
     with torch.no_grad():
@@ -77,8 +33,6 @@ def get_similar_precedent(data, result_embeddings, question):
     max_similarity = similarities.max().item()
     max_similarity_idx = similarities.argmax().item()
 
-    # print(f'>>> Max similarity: {max_similarity}')
-
     return data[max_similarity_idx], max_similarity
 
 def get_similar_precedent_total(data, result_embeddings, question_vector):
@@ -88,6 +42,18 @@ def get_similar_precedent_total(data, result_embeddings, question_vector):
 
     return data[max_similarity_idx], max_similarity
 
+# 유사한 질문 및 전문가 평가를 위한 쿼리
+# evaluation_query = text(f"""
+#                         """)
+# evaluation_result = connection.execute(evaluation_query).fetchall()
+
+# evaluation_result_embeddings = torch.tensor([
+#     [float(num_str) for num_str in row[0][1:-1].split(',')]
+#     for row in evaluation_result
+# ])
+
+# questions = [row[1] for row in evaluation_result]
+# expert_evaluations = [row[2] for row in evaluation_result]
 
 # 질문의 유사도를 계산해서 가장 높은 유사도를 가진 질문과 전문가 평가를 반환
 # def get_most_similar_question(question):
