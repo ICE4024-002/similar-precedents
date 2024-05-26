@@ -1,11 +1,15 @@
 import torch
+import os
 from sqlalchemy import create_engine
 from sqlalchemy import text
 from transformers import AutoModel, AutoTokenizer
+from dotenv import load_dotenv
 
-leeeeeyeon = 'leeeeeyeon'
-yeonghyun = 'song-yeonghyun'
-engine = create_engine(f'postgresql://{yeonghyun}:1234@localhost:5432/postgres')
+dotenv_path = os.path.join(os.path.dirname(__file__), '.env.local')
+load_dotenv(dotenv_path)
+
+db_url = os.getenv('DB_URL')
+engine = create_engine(db_url)
 connection = engine.connect()
 print(">>> Connection established successfully!")
 

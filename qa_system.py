@@ -8,21 +8,27 @@ from datasets import load_dataset
 import torch
 from sqlalchemy import create_engine
 from sqlalchemy import text
+from dotenv import load_dotenv
 
-정연 = 'postgresql://leeeeeyeon:1234@localhost:5432/postgres'
-영현 = 'postgresql://song-yeonghyun:1234@localhost:5432/postgres'
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
+
+# 환경변수 파일 로드 및 설정
+dotenv_path = os.path.join(os.path.dirname(__file__), '.env.local')
+load_dotenv(dotenv_path)
+
+db_url = os.getenv('DB_URL')
+open_api_key = os.getenv('OPEN_API_KEY')
 
 client = OpenAI(
     # This is the default and can be omitted
-    api_key="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",
+    api_key=open_api_key,
 )
 
 dataset_id ="joonhok-exo-ai/korean_law_open_data_precedents"
 dataset = load_dataset(dataset_id)
 data = dataset['train']
 
-engine = create_engine(영현)
+engine = create_engine(db_url)
 connection = engine.connect()
 print(">>> Connection established successfully!")
 
