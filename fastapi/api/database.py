@@ -4,6 +4,6 @@ from sqlalchemy.orm import sessionmaker
 
 leeeeeyeon = 'leeeeeyeon'
 yeonghyun = 'song-yeonghyun'
-engine = create_engine(f'postgresql://{leeeeeyeon}:1234@localhost:5432/postgres')
+engine = create_engine(f'postgresql://{yeonghyun}:1234@localhost:5432/postgres')
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()

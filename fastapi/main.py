@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Depends, Query
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from contextlib import asynccontextmanager
 import asyncio
@@ -36,6 +37,22 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
+# CORS 설정
+origins = [
+    "http://localhost",
+    "http://localhost:8000",
+    "http://localhost:3000"
+    # 필요한 경우 다른 도메인도 추가 가능
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 # 질문에 대한 유사 판례를 반환하는 API
 @app.get("/similar-precedent/")
 def get_similar_precedent(question: str = Query(...)):
@@ -46,7 +63,7 @@ def get_similar_precedent(question: str = Query(...)):
     return {"similarity": similarity, "precedent": precedent}
 
 # 질문이 Input으로 들어오면 유사 판례 정보와 GPT 답변을 Output으로 반환하는 API
-@app.get("/answer/")
+@app.get("/answer")
 def get_gpt_answer(question: str = Query(...)):
     similar_precedent, similarity = find_similar_precedent(question, app.state.precedents, app.state.precedents_embeddings)
     answer = get_gpt_answer_by_precedent(question, similar_precedent, similarity)
