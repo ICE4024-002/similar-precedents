@@ -2,6 +2,11 @@ import pandas as pd
 from tqdm import tqdm
 from sqlalchemy import create_engine
 from sqlalchemy import text
+import os
+from dotenv import load_dotenv
+
+dotenv_path = os.path.join(os.path.dirname(__file__), '../.env.local')
+load_dotenv(dotenv_path)
 
 vectors = pd.read_csv('./embedded_data.csv')
 print('>>> CSV read complete!')

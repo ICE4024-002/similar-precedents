@@ -10,9 +10,13 @@ from sqlalchemy import text
 from tqdm import tqdm
 from datasets import load_dataset
 from langchain.prompts import PromptTemplate
+import os
+from dotenv import load_dotenv
 
-정연 = 'postgresql://leeeeeyeon:1234@localhost:5432/postgres'
-영현 = 'postgresql://song-yeonghyun:1234@localhost:5432/postgres'
+dotenv_path = os.path.join(os.path.dirname(__file__), '../.env.local')
+load_dotenv(dotenv_path)
+db_url = os.getenv('DB_URL')
+
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 # 유사도가 낮은 경우의 프롬프트 템플릿
@@ -48,7 +52,7 @@ dataset_id ="joonhok-exo-ai/korean_law_open_data_precedents"
 dataset = load_dataset(dataset_id)
 data = dataset['train']
 
-engine = create_engine(영현)
+engine = create_engine(db_url)
 connection = engine.connect()
 print(">>> Connection established successfully!")
 
