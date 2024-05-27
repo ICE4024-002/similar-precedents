@@ -11,6 +11,7 @@ from init import load_precedents, load_precedents_embeddings
 from similar_precedent import find_similar_precedent
 from qa_system import get_gpt_answer_by_precedent
 
+from config.cors_config import add_cors_middleware
 from dto.feedback import models, schemas
 from dto.precedent.schemas import Precedent
 from api import crud
@@ -37,21 +38,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
-# CORS 설정
-origins = [
-    "http://localhost",
-    "http://localhost:8000",
-    "http://localhost:3000"
-    # 필요한 경우 다른 도메인도 추가 가능
-]
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+add_cors_middleware(app)
 
 # 질문에 대한 유사 판례를 반환하는 API
 @app.get("/similar-precedent/")
