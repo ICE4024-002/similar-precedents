@@ -112,6 +112,7 @@ def create_expert_feedback(feedback: dto.feedback.expert.schemas.ExpertFeedbackC
 
     db.add(expert_feedback)
     db.commit()
+    db.refresh(expert_feedback)
 
     return expert_feedback
 
@@ -122,5 +123,6 @@ def create_questioner_feedback(feedback: dto.feedback.questioner.schemas.Questio
 
     db.add(questioner_feedback)
     db.commit()
+    db.refresh(questioner_feedback)
 
     return questioner_feedback
