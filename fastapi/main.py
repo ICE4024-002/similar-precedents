@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 import asyncio
 
 import sys, os
+import time
 
 import dto.feedback
 import dto.feedback.expert
@@ -18,7 +19,6 @@ import dto.qna
 import dto.qna.models
 import dto.qna.schemas
 import dto.question
-import dto.question.models
 import dto.question.schemas
 
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
@@ -66,22 +66,33 @@ def get_similar_precedent(Question: dto.question.schemas.Question):
 # 질문에 대한 유사 판례 정보와 GPT 답변을 반환하는 API
 @app.post("/answer")
 def get_gpt_answer(Question: dto.question.schemas.Question, db: Session = Depends(get_db)):
+    start_time = time.time()
+
     # 질문 임베딩
     question_vector = create_embeddings(Question.question)
+    embedding_time = time.time() - start_time
 
     # 유사 판례 검색
     similar_precedent, similarity = find_similar_precedent(question_vector, app.state.precedents, app.state.precedents_embeddings)
+    search_time = time.time() - start_time - embedding_time
 
     # GPT 답변 생성
     answer = get_gpt_answer_by_precedent(Question.question, similar_precedent, similarity)
+    gpt_time = time.time() - start_time - embedding_time - search_time 
 
     # DB에 QA 저장
     qna = dto.qna.models.QnA(question=Question.question, answer=answer)
-    # add_and_commit(db, qna)
+    add_and_commit(db, qna)
+    db_time = time.time() - start_time - embedding_time - search_time - gpt_time
 
     # DB에 질문 벡터 저장
     # TODO: native query를 사용하여 벡터 저장
-    question_vector_float = [tensor.item() for tensor in question_vector]
+    # question_vector_float = [tensor.item() for tensor in question_vector]
+
+    print("질문 임베딩 시간:", embedding_time)
+    print("유사 판례 검색 시간:", search_time)
+    print("GPT 답변 생성 시간:", gpt_time)
+    print("DB 저장 시간:", db_time)
     
 
     return { "answer": answer, "similarity": similarity, "precedent": similar_precedent }
