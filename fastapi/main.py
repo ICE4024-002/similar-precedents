@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException, BackgroundTasks
+from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 from contextlib import asynccontextmanager
 import asyncio
@@ -18,6 +18,7 @@ import dto.qna
 import dto.qna.models
 import dto.qna.schemas
 import dto.question
+import dto.question.models
 import dto.question.schemas
 
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
@@ -28,6 +29,7 @@ from init import load_precedents, load_precedents_embeddings
 from similar_precedent import find_similar_precedent
 from qa_system import get_gpt_answer_by_precedent
 from g_eval import calculate_g_eval_score
+from embedding import create_embeddings
 
 from config.cors_config import add_cors_middleware
 
@@ -63,18 +65,24 @@ def get_similar_precedent(Question: dto.question.schemas.Question):
 
 # 질문에 대한 유사 판례 정보와 GPT 답변을 반환하는 API
 @app.post("/answer")
-async def get_gpt_answer(Question: dto.question.schemas.Question, 
-                         background_tasks: BackgroundTasks,
-                         db: Session = Depends(get_db)):
+def get_gpt_answer(Question: dto.question.schemas.Question, db: Session = Depends(get_db)):
+    # 질문 임베딩
+    question_vector = create_embeddings(Question.question)
+
     # 유사 판례 검색
-    similar_precedent, similarity = find_similar_precedent(Question.question, app.state.precedents, app.state.precedents_embeddings)
+    similar_precedent, similarity = find_similar_precedent(question_vector, app.state.precedents, app.state.precedents_embeddings)
 
     # GPT 답변 생성
     answer = get_gpt_answer_by_precedent(Question.question, similar_precedent, similarity)
 
     # DB에 QA 저장
     qna = dto.qna.models.QnA(question=Question.question, answer=answer)
-    background_tasks.add_task(add_and_commit, db, qna)
+    # add_and_commit(db, qna)
+
+    # DB에 질문 벡터 저장
+    # TODO: native query를 사용하여 벡터 저장
+    question_vector_float = [tensor.item() for tensor in question_vector]
+    
 
     return { "answer": answer, "similarity": similarity, "precedent": similar_precedent }
 
@@ -111,9 +119,7 @@ def get_waiting_question(id: int, db: Session = Depends(get_db)):
 def create_expert_feedback(feedback: dto.feedback.expert.schemas.ExpertFeedbackCreate, db: Session = Depends(get_db)):
     expert_feedback = dto.feedback.expert.models.ExpertFeedback(qna_id=feedback.qna_id, feedback=feedback.feedback)
 
-    db.add(expert_feedback)
-    db.commit()
-    db.refresh(expert_feedback)
+    add_and_commit(db, expert_feedback)
 
     return expert_feedback
 
@@ -122,8 +128,6 @@ def create_expert_feedback(feedback: dto.feedback.expert.schemas.ExpertFeedbackC
 def create_questioner_feedback(feedback: dto.feedback.questioner.schemas.QuestionerFeedbackCreate, db: Session = Depends(get_db)):
     questioner_feedback = dto.feedback.questioner.models.QuestionerFeedback(qna_id=feedback.qna_id, feedback=feedback.feedback)
 
-    db.add(questioner_feedback)
-    db.commit()
-    db.refresh(questioner_feedback)
+    add_and_commit(db, questioner_feedback)
 
     return questioner_feedback
