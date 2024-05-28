@@ -1,8 +1,9 @@
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, Session
 import os
 from dotenv import load_dotenv
+from typing import Any
 
 dotenv_path = os.path.join(os.path.dirname(__file__), '../.env.local')
 load_dotenv(dotenv_path)
@@ -18,3 +19,10 @@ def get_db():
         yield db
     finally:
         db.close()
+
+def add_and_commit(db: Session, instance: Any) -> Any:
+    db.add(instance)
+    db.commit()
+    db.refresh(instance)
+
+    return instance

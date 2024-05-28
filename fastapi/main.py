@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, HTTPException, BackgroundTasks
 from sqlalchemy.orm import Session
 from contextlib import asynccontextmanager
 import asyncio
@@ -22,7 +22,7 @@ import dto.question.schemas
 
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 
-from database import engine, Base, get_db
+from database import engine, Base, get_db, add_and_commit
 
 from init import load_precedents, load_precedents_embeddings
 from similar_precedent import find_similar_precedent
@@ -63,7 +63,9 @@ def get_similar_precedent(Question: dto.question.schemas.Question):
 
 # 질문에 대한 유사 판례 정보와 GPT 답변을 반환하는 API
 @app.post("/answer")
-def get_gpt_answer(Question: dto.question.schemas.Question, db: Session = Depends(get_db)):
+async def get_gpt_answer(Question: dto.question.schemas.Question, 
+                         background_tasks: BackgroundTasks,
+                         db: Session = Depends(get_db)):
     # 유사 판례 검색
     similar_precedent, similarity = find_similar_precedent(Question.question, app.state.precedents, app.state.precedents_embeddings)
 
@@ -72,8 +74,7 @@ def get_gpt_answer(Question: dto.question.schemas.Question, db: Session = Depend
 
     # DB에 QA 저장
     qna = dto.qna.models.QnA(question=Question.question, answer=answer)
-    db.add(qna)
-    db.commit()
+    background_tasks.add_task(add_and_commit, db, qna)
 
     return { "answer": answer, "similarity": similarity, "precedent": similar_precedent }
 
