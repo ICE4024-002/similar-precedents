@@ -34,4 +34,21 @@ def load_precedents_embeddings():
     ])
 
     print('>>> Precedents Embeddings loaded!')
-    return result_embeddings    
+    return result_embeddings
+
+def load_question_embeddings():
+    query = text(f"""
+    SELECT
+        question_id, embedding
+    FROM
+        question_vector;
+    """)
+    result = connection.execute(query).fetchall()
+
+    result_embeddings = [
+        (row[0], [float(num_str) for num_str in row[1][1:-1].split(',')])
+        for row in result
+    ]
+
+    print('>>> Question Embeddings loaded!')
+    return result_embeddings

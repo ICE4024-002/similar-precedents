@@ -23,13 +23,14 @@ import dto.question.schemas
 
 sys.path.append(os.path.dirname(os.path.abspath(os.path.dirname(__file__))))
 
-from database import engine, Base, get_db, add_and_commit
+from database import engine, Base, get_db, add_and_commit, add_embedding_to_db
 
-from init import load_precedents, load_precedents_embeddings
+from init import load_precedents, load_precedents_embeddings, load_question_embeddings
 from similar_precedent import find_similar_precedent
 from qa_system import get_gpt_answer_by_precedent
 from g_eval import calculate_g_eval_score
 from embedding import create_embeddings
+from similar_question import get_similar_question
 
 from config.cors_config import add_cors_middleware
 
@@ -42,9 +43,11 @@ async def lifespan(app: FastAPI):
     loop = asyncio.get_event_loop()
     precedents = await loop.run_in_executor(None, load_precedents)
     precedents_embeddings = await loop.run_in_executor(None, load_precedents_embeddings)
+    question_embeddings = await loop.run_in_executor(None, load_question_embeddings)
 
     app.state.precedents = precedents
     app.state.precedents_embeddings = precedents_embeddings
+    app.state.question_embeddings = question_embeddings
 
     print(">> Server started!")
     yield
@@ -76,6 +79,18 @@ def get_gpt_answer(Question: dto.question.schemas.Question, db: Session = Depend
     similar_precedent, similarity = find_similar_precedent(question_vector, app.state.precedents, app.state.precedents_embeddings)
     search_time = time.time() - start_time - embedding_time
 
+    # 유사 질문 검색
+    similar_question_id = get_similar_question(question_vector, app.state.question_embeddings)
+    print("similar_question_id: ", similar_question_id)
+
+    # 유사 질문에 대한 피드백이 없을 경우 None 반환
+    expert_feedback = db.query(dto.feedback.expert.models.ExpertFeedback).filter(dto.feedback.expert.models.ExpertFeedback.qna_id == similar_question_id).first()
+    questioner_feedback = db.query(dto.feedback.questioner.models.QuestionerFeedback).filter(dto.feedback.questioner.models.QuestionerFeedback.qna_id == similar_question_id).first()
+    # TODO: 가장 유사한 질문이 피드백이 없을 경우 예외 처리
+    
+    print("expert_feedback: ", expert_feedback.feedback)
+    print("questioner_feedback: ", questioner_feedback.feedback)
+
     # GPT 답변 생성
     answer = get_gpt_answer_by_precedent(Question.question, similar_precedent, similarity)
     gpt_time = time.time() - start_time - embedding_time - search_time 
@@ -94,7 +109,6 @@ def get_gpt_answer(Question: dto.question.schemas.Question, db: Session = Depend
     print("GPT 답변 생성 시간:", gpt_time)
     print("DB 저장 시간:", db_time)
     
-
     return { "answer": answer, "similarity": similarity, "precedent": similar_precedent }
 
 # 질문과 답변에 대해 G-EVAL 점수를 반환하는 API
