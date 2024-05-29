@@ -76,3 +76,25 @@ def get_gpt_answer_by_precedent(question, similar_precedent, similarity):
         return chat_completion.choices[0].message.content
     except Exception as e:
         print(e)
+
+def regenerate_gpt_answer(question):
+    try:
+        prompt_content = low_similarity_prompt.format()
+        user_input = {
+        "role": "user",
+        "content": f"{question}",
+        }
+        messages_list = [
+            {"role": "system", "content": prompt_content},
+            user_input
+        ]
+
+        chat_completion = client.chat.completions.create(
+            messages=messages_list,
+            model="gpt-3.5-turbo",
+            temperature=0
+        )
+
+        return chat_completion.choices[0].message.content
+    except Exception as e:
+        print(e)
