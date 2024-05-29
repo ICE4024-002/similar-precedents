@@ -28,7 +28,7 @@ from database import engine, Base, get_db, add_and_commit, add_embedding_to_db
 from init import load_precedents, load_precedents_embeddings, load_question_embeddings
 from similar_precedent import find_similar_precedent
 from qa_system import get_gpt_answer_by_precedent, regenerate_gpt_answer
-from g_eval import calculate_g_eval_score
+from g_eval import calculate_g_eval_score, evaluate_scores
 from embedding import create_embeddings
 from similar_question import get_similar_question
 
@@ -116,13 +116,6 @@ def get_gpt_answer(Question: dto.question.schemas.Question, db: Session = Depend
     print("DB 저장 시간:", db_time)
     
     return { "answer": answer, "similarity": similarity, "precedent": similar_precedent }
-
-# 질문과 답변에 대해 G-EVAL 점수를 반환하는 API
-@app.post("/g-eval")
-def get_g_eval_score(qna: dto.qna.schemas.QnABase):
-    g_eval_score = calculate_g_eval_score(qna.question, qna.answer)
-
-    return { "g-eval": g_eval_score }
 
 # 전문가의 피드백이 없는 QnA 목록을 반환하는 API
 @app.get("/waiting-questions")
