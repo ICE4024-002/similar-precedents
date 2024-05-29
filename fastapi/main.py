@@ -82,7 +82,8 @@ def get_gpt_answer(Question: dto.question.schemas.Question, db: Session = Depend
     print("유사 판례 검색 시간:", search_time - embedding_time)
     
     # 유사 질문 검색
-    # TODO: 이전 질문이 없는 경우 예외 처리
+    if app.state.question_embeddings is None:
+        return HTTPException(status_code=404, detail="No previous questions")
     similar_question_id = get_similar_question(question_vector, app.state.question_embeddings)
     print(">>> similar_question_id: ", similar_question_id)
     
