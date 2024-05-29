@@ -86,8 +86,8 @@ def get_gpt_answer(Question: dto.question.schemas.Question, db: Session = Depend
     db_time = time.time() - start_time - embedding_time - search_time - gpt_time
 
     # DB에 질문 벡터 저장
-    # TODO: native query를 사용하여 벡터 저장
-    # question_vector_float = [tensor.item() for tensor in question_vector]
+    question_vector_float = [tensor.item() for tensor in question_vector]
+    add_embedding_to_db(qna.id,question_vector_float, "question_vector", db)
 
     print("질문 임베딩 시간:", embedding_time)
     print("유사 판례 검색 시간:", search_time)

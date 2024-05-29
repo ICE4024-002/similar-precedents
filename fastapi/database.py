@@ -4,6 +4,7 @@ from sqlalchemy.orm import sessionmaker, Session
 import os
 from dotenv import load_dotenv
 from typing import Any
+from sqlalchemy import text
 
 dotenv_path = os.path.join(os.path.dirname(__file__), '../.env.local')
 load_dotenv(dotenv_path)
@@ -26,3 +27,7 @@ def add_and_commit(db: Session, instance: Any) -> Any:
     db.refresh(instance)
 
     return instance
+
+def add_embedding_to_db(question_id, embedding, table_name, db: Session):
+    db.execute(text(f"INSERT INTO {table_name} (question_id, embedding) VALUES ({question_id}, '{embedding}')"))
+    db.commit()
