@@ -36,7 +36,13 @@ You must answer in Korean.
 low_similarity_prompt = PromptTemplate(input_variables=[], template=low_similarity_template)
 high_similarity_prompt = PromptTemplate(input_variables=["similarPrecedent", "expertEvaluation", "questionerEvaluation"], template=high_similarity_template)
 
-def get_gpt_answer_by_precedent(question, similar_precedent, similarity, expert_feedback, questioner_feedback):
+def get_gpt_answer_by_precedent(question, similar_precedent, similarity, expert_feedback=None, questioner_feedback=None):
+    print(">>> expert_feedback: ")
+    print(expert_feedback)
+    print(">>> questioner_feedback: ")
+    print(questioner_feedback)
+    
+    print("end")
     if similarity < similarity_threshold:
         prompt_content = low_similarity_prompt.format()
     else:
@@ -55,14 +61,19 @@ def get_gpt_answer_by_precedent(question, similar_precedent, similarity, expert_
         
         if expert_feedback:
             expert_evaluation = f"""
+            Here's what our experts have to say about similar questions.
+            Please refer to them to generate your answer.
             Expert Feedback: {expert_feedback}
             """
         else:
             expert_evaluation = ""
         
-        if questioner_feedback:
+        if questioner_feedback: 
+            print(questioner_feedback)
             questioner_evaluation = f"""
-            Questioner Feedback: {questioner_feedback}
+            Here's an example answer to a similar question.
+            Please refer to answer when answering.
+            example answer: {questioner_feedback}
             """
         else:
             questioner_evaluation = ""
