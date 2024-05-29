@@ -34,9 +34,9 @@ You must answer in Korean.
 """
 
 low_similarity_prompt = PromptTemplate(input_variables=[], template=low_similarity_template)
-high_similarity_prompt = PromptTemplate(input_variables=["similarPrecedent", "expertEvaluation"], template=high_similarity_template)
+high_similarity_prompt = PromptTemplate(input_variables=["similarPrecedent", "expertEvaluation", "questionerEvaluation"], template=high_similarity_template)
 
-def get_gpt_answer_by_precedent(question, similar_precedent, similarity):
+def get_gpt_answer_by_precedent(question, similar_precedent, similarity, expert_feedback, questioner_feedback):
     if similarity < similarity_threshold:
         prompt_content = low_similarity_prompt.format()
     else:
@@ -52,9 +52,22 @@ def get_gpt_answer_by_precedent(question, similar_precedent, similarity):
             'referencePrecedents': {similar_precedent['참조판례']},
             'fullText': {similar_precedent['전문']}
         """
-
+        
+        if expert_feedback:
+            expert_evaluation = f"""
+            Expert Feedback: {expert_feedback}
+            """
+        else:
+            expert_evaluation = ""
+        
+        if questioner_feedback:
+            questioner_evaluation = f"""
+            Questioner Feedback: {questioner_feedback}
+            """
+        else:
+            questioner_evaluation = ""
         # 비슷한 판례와 전문가 평가를 추가
-        prompt_content = high_similarity_prompt.format(similarPrecedent=similar_precedent_content, expertEvaluation="")
+        prompt_content = high_similarity_prompt.format(similarPrecedent=similar_precedent_content, expertEvaluation=expert_evaluation, questionerEvaluation=questioner_evaluation)
 
     user_input = {
         "role": "user",

@@ -78,6 +78,12 @@ def calculate_g_eval_score(question, answer):
                 scores["Relevance"] = int(line.split(": ")[1])
             elif "Practicality" in line:
                 scores["Practicality"] = int(line.split(": ")[1])
+                
+        below_threshold = evaluate_scores(scores)
+        
+        if below_threshold:
+            # 3점 미만인 항목이 있을 경우 코드 작성
+            pass
 
         return chat_completion.choices[0].message.content
     except Exception as e:
