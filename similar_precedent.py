@@ -1,23 +1,14 @@
-import torch
-
-def cal_score(a, b):
-    if len(a.shape) == 1: a = a.unsqueeze(0)
-    if len(b.shape) == 1: b = b.unsqueeze(0)
-
-    a_norm = a / a.norm(dim=1)[:, None]
-    b_norm = b / b.norm(dim=1)[:, None]
-
-    return torch.mm(a_norm, b_norm.transpose(0, 1)) * 100
+from similarity import cal_cosine
 
 def find_similar_precedent(question_vector, data, result_embeddings):
-    similarities = cal_score(question_vector.unsqueeze(0), result_embeddings)
+    similarities = cal_cosine(question_vector.unsqueeze(0), result_embeddings)
     max_similarity = similarities.max().item()
     max_similarity_idx = similarities.argmax().item()
 
     return data[max_similarity_idx], max_similarity
 
 def get_similar_precedent_total(data, result_embeddings, question_vector):
-    similarities = cal_score(question_vector.unsqueeze(0), result_embeddings)
+    similarities = cal_cosine(question_vector.unsqueeze(0), result_embeddings)
     max_similarity = similarities.max().item()
     max_similarity_idx = similarities.argmax().item()
 
@@ -47,7 +38,7 @@ def get_similar_precedent_total(data, result_embeddings, question_vector):
 
 #     question_vector = embeddings[0]
 
-#     similarities = cal_score(question_vector.unsqueeze(0), evaluation_result_embeddings)
+#     similarities = cal_cosine(question_vector.unsqueeze(0), evaluation_result_embeddings)
 #     max_similarity = similarities.max().item()
 #     max_similarity_idx = similarities.argmax().item()
 
