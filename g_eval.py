@@ -14,6 +14,7 @@ client = OpenAI(
 
 # 점수가 3점 미만인 항목을 반환
 def evaluate_scores(scores):
+    print(scores)
     below_threshold = {}
     
     for category, score in scores.items():
@@ -55,9 +56,6 @@ def calculate_g_eval_score(question, answer):
     prompt_template = PromptTemplate(input_variables=["question", "answer"], template=g_eval_template)
     prompt = prompt_template.format(question=question, answer=answer)
 
-    print(prompt)
-    
-
     try:
         chat_completion = client.chat.completions.create(
             messages=[
@@ -85,6 +83,6 @@ def calculate_g_eval_score(question, answer):
             # 3점 미만인 항목이 있을 경우 코드 작성
             pass
 
-        return chat_completion.choices[0].message.content
+        return scores
     except Exception as e:
         print(e)
