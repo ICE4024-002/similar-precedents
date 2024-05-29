@@ -70,52 +70,60 @@ def get_similar_precedent(Question: dto.question.schemas.Question):
 @app.post("/answer")
 def get_gpt_answer(Question: dto.question.schemas.Question, db: Session = Depends(get_db)):
     start_time = time.time()
-
+    
     # 질문 임베딩
     question_vector = create_embeddings(Question.question)
-    embedding_time = time.time() - start_time
-
+    embedding_time = time.time()
+    print("질문 임베딩 시간:", embedding_time - start_time)
+    
     # 유사 판례 검색
     similar_precedent, similarity = find_similar_precedent(question_vector, app.state.precedents, app.state.precedents_embeddings)
-    search_time = time.time() - start_time - embedding_time
-
+    search_time = time.time()
+    print("유사 판례 검색 시간:", search_time - embedding_time)
+    
     # 유사 질문 검색
+    # TODO: 이전 질문이 없는 경우 예외 처리
     similar_question_id = get_similar_question(question_vector, app.state.question_embeddings)
-    print("similar_question_id: ", similar_question_id)
-
+    print(">>> similar_question_id: ", similar_question_id)
+    
     # 유사 질문에 대한 피드백이 없을 경우 None 반환
     expert_feedback = db.query(dto.feedback.expert.models.ExpertFeedback).filter(dto.feedback.expert.models.ExpertFeedback.qna_id == similar_question_id).first()
     questioner_feedback = db.query(dto.feedback.questioner.models.QuestionerFeedback).filter(dto.feedback.questioner.models.QuestionerFeedback.qna_id == similar_question_id).first()
     # TODO: 가장 유사한 질문이 피드백이 없을 경우 예외 처리
-
-    print("expert_feedback: ", expert_feedback.feedback)
-    print("questioner_feedback: ", questioner_feedback.feedback)
-
+    
+    print(">>> expert_feedback: ", expert_feedback.feedback if expert_feedback else "None")
+    print(">>> questioner_feedback: ", questioner_feedback.feedback if questioner_feedback else "None")
+    
     # GPT 답변 생성
     answer = get_gpt_answer_by_precedent(Question.question, similar_precedent, similarity)
-    gpt_time = time.time() - start_time - embedding_time - search_time
-
+    gpt_time = time.time()
+    print("GPT 답변 생성 시간:", gpt_time - search_time)
+    
     # 답변에 대한 G-EVAL 점수 계산
-    # TODO: G-EVAL 점수 계산 함수 구현 후 숫자 변경
-    g_eval_score = 100
-    if g_eval_score < 0:
+    g_eval_score = calculate_g_eval_score(Question.question, answer)
+    if evaluate_scores(g_eval_score):
+        print(">>> G-EVAL 점수 충족 X !!!")
         answer = regenerate_gpt_answer(Question.question)
-
+        gpt_regenerate_time = time.time()
+        print("GPT 답변 재생성 시간:", gpt_regenerate_time - gpt_time)
+    
     # DB에 QA 저장
     qna = dto.qna.models.QnA(question=Question.question, answer=answer)
     add_and_commit(db, qna)
-    db_time = time.time() - start_time - embedding_time - search_time - gpt_time
-
+    db_save_time = time.time()
+    print("DB 저장 시간:", db_save_time - gpt_time)
+    
     # DB에 질문 벡터 저장
     question_vector_float = [tensor.item() for tensor in question_vector]
-    add_embedding_to_db(qna.id,question_vector_float, "question_vector", db)
-
-    print("질문 임베딩 시간:", embedding_time)
-    print("유사 판례 검색 시간:", search_time)
-    print("GPT 답변 생성 시간:", gpt_time)
-    print("DB 저장 시간:", db_time)
+    add_embedding_to_db(qna.id, question_vector_float, "question_vector", db)
+    db_embedding_time = time.time()
+    print("질문 벡터 DB 저장 시간:", db_embedding_time - db_save_time)
+    
+    total_time = db_embedding_time - start_time
+    print("전체 실행 시간:", total_time)
     
     return { "answer": answer, "similarity": similarity, "precedent": similar_precedent }
+
 
 # 전문가의 피드백이 없는 QnA 목록을 반환하는 API
 @app.get("/waiting-questions")
