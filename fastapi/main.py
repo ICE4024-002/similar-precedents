@@ -27,7 +27,7 @@ from database import engine, Base, get_db, add_and_commit, add_embedding_to_db
 
 from init import load_precedents, load_precedents_embeddings, load_question_embeddings
 from similar_precedent import find_similar_precedent
-from qa_system import get_gpt_answer_by_precedent
+from qa_system import get_gpt_answer_by_precedent, regenerate_gpt_answer
 from g_eval import calculate_g_eval_score
 from embedding import create_embeddings
 from similar_question import get_similar_question
@@ -87,13 +87,19 @@ def get_gpt_answer(Question: dto.question.schemas.Question, db: Session = Depend
     expert_feedback = db.query(dto.feedback.expert.models.ExpertFeedback).filter(dto.feedback.expert.models.ExpertFeedback.qna_id == similar_question_id).first()
     questioner_feedback = db.query(dto.feedback.questioner.models.QuestionerFeedback).filter(dto.feedback.questioner.models.QuestionerFeedback.qna_id == similar_question_id).first()
     # TODO: 가장 유사한 질문이 피드백이 없을 경우 예외 처리
-    
+
     print("expert_feedback: ", expert_feedback.feedback)
     print("questioner_feedback: ", questioner_feedback.feedback)
 
     # GPT 답변 생성
     answer = get_gpt_answer_by_precedent(Question.question, similar_precedent, similarity)
-    gpt_time = time.time() - start_time - embedding_time - search_time 
+    gpt_time = time.time() - start_time - embedding_time - search_time
+
+    # 답변에 대한 G-EVAL 점수 계산
+    # TODO: G-EVAL 점수 계산 함수 구현 후 숫자 변경
+    g_eval_score = 100
+    if g_eval_score < 0:
+        answer = regenerate_gpt_answer(Question.question)
 
     # DB에 QA 저장
     qna = dto.qna.models.QnA(question=Question.question, answer=answer)
