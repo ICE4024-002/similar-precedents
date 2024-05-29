@@ -94,11 +94,22 @@ def get_gpt_answer(Question: dto.question.schemas.Question, db: Session = Depend
         expert_feedback = db.query(dto.feedback.expert.models.ExpertFeedback).filter(dto.feedback.expert.models.ExpertFeedback.qna_id == similar_question_id).first()
         questioner_feedback = db.query(dto.feedback.questioner.models.QuestionerFeedback).filter(dto.feedback.questioner.models.QuestionerFeedback.qna_id == similar_question_id).first()
         
+        
+            
+        
         print(">>> expert_feedback: ", expert_feedback.feedback if expert_feedback else "None")
         print(">>> questioner_feedback: ", questioner_feedback.feedback if questioner_feedback else "None")
     
+    similarAns = None
+    expertFeedback = None
+    
+    if questioner_feedback and questioner_feedback.feedback > 3:
+        similarAns = qna.answer
+    
+    if expert_feedback:
+        expertFeedback = expert_feedback.feedback
     # GPT 답변 생성
-    answer = get_gpt_answer_by_precedent(Question.question, similar_precedent, similarity, expert_feedback, questioner_feedback)
+    answer = get_gpt_answer_by_precedent(Question.question, similar_precedent, similarity, expertFeedback, similarAns)
     gpt_time = time.time()
     print("GPT 답변 생성 시간:", gpt_time - search_time)
     
