@@ -14,7 +14,6 @@ client = OpenAI(
 
 # 점수가 3점 미만인 항목을 반환
 def evaluate_scores(scores):
-    print(scores)
     below_threshold = {}
     
     for category, score in scores.items():

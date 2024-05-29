@@ -82,14 +82,14 @@ def get_gpt_answer(Question: dto.question.schemas.Question, db: Session = Depend
     print("유사 판례 검색 시간:", search_time - embedding_time)
     
     # 유사 질문 검색
-    # TODO: 이전 질문이 없는 경우 예외 처리
+    if app.state.question_embeddings is None:
+        return HTTPException(status_code=404, detail="No previous questions")
     similar_question_id = get_similar_question(question_vector, app.state.question_embeddings)
     print(">>> similar_question_id: ", similar_question_id)
     
     # 유사 질문에 대한 피드백이 없을 경우 None 반환
     expert_feedback = db.query(dto.feedback.expert.models.ExpertFeedback).filter(dto.feedback.expert.models.ExpertFeedback.qna_id == similar_question_id).first()
     questioner_feedback = db.query(dto.feedback.questioner.models.QuestionerFeedback).filter(dto.feedback.questioner.models.QuestionerFeedback.qna_id == similar_question_id).first()
-    # TODO: 가장 유사한 질문이 피드백이 없을 경우 예외 처리
     
     print(">>> expert_feedback: ", expert_feedback.feedback if expert_feedback else "None")
     print(">>> questioner_feedback: ", questioner_feedback.feedback if questioner_feedback else "None")
@@ -104,14 +104,14 @@ def get_gpt_answer(Question: dto.question.schemas.Question, db: Session = Depend
     if evaluate_scores(g_eval_score):
         print(">>> G-EVAL 점수 충족 X !!!")
         answer = regenerate_gpt_answer(Question.question)
-        gpt_regenerate_time = time.time()
-        print("GPT 답변 재생성 시간:", gpt_regenerate_time - gpt_time)
+    g_eval_time = time.time()
+    print("G-EVAL 점수 계산 및 미충족 시 재생성 시간:", g_eval_time - gpt_time)
     
     # DB에 QA 저장
     qna = dto.qna.models.QnA(question=Question.question, answer=answer)
     add_and_commit(db, qna)
     db_save_time = time.time()
-    print("DB 저장 시간:", db_save_time - gpt_time)
+    print("DB 저장 시간:", db_save_time - g_eval_time)
     
     # DB에 질문 벡터 저장
     question_vector_float = [tensor.item() for tensor in question_vector]
