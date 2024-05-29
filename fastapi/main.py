@@ -94,7 +94,7 @@ def get_gpt_answer(Question: dto.question.schemas.Question, db: Session = Depend
         print(">>> questioner_feedback: ", questioner_feedback.feedback if questioner_feedback else "None")
     
     # GPT 답변 생성
-    answer = get_gpt_answer_by_precedent(Question.question, similar_precedent, similarity)
+    answer = get_gpt_answer_by_precedent(Question.question, similar_precedent, similarity, expert_feedback, questioner_feedback)
     gpt_time = time.time()
     print("GPT 답변 생성 시간:", gpt_time - search_time)
     
@@ -108,13 +108,15 @@ def get_gpt_answer(Question: dto.question.schemas.Question, db: Session = Depend
     
     # DB에 QA 저장
     qna = dto.qna.models.QnA(question=Question.question, answer=answer)
-    add_and_commit(db, qna)
+    if similarity >= 65:
+        add_and_commit(db, qna)
     db_save_time = time.time()
     print("DB 저장 시간:", db_save_time - g_eval_time)
     
     # DB에 질문 벡터 저장
     question_vector_float = [tensor.item() for tensor in question_vector]
-    add_embedding_to_db(qna.id, question_vector_float, "question_vector", db)
+    if similarity >= 65:
+        add_embedding_to_db(qna.id, question_vector_float, "question_vector", db)
     db_embedding_time = time.time()
     print("질문 벡터 DB 저장 시간:", db_embedding_time - db_save_time)
     
