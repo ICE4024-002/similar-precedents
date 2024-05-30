@@ -81,35 +81,37 @@ def get_gpt_answer(Question: dto.question.schemas.Question, db: Session = Depend
     search_time = time.time()
     print("유사 판례 검색 시간:", search_time - embedding_time)
     
+    similar_qna = None
+    expert_feedback = None
+    questioner_feedback = None
+
     # 유사 질문 검색
     if app.state.question_embeddings:
         similar_question_id = get_similar_question(question_vector, app.state.question_embeddings)
         print(">>> similar_question_id: ", similar_question_id)
 
-        qna = db.query(dto.qna.models.QnA).filter(dto.qna.models.QnA.id == similar_question_id).first()
-        print(">>> similar_question: ", qna.question if qna else "None")
-        print(">>> similar_answer: ", qna.answer if qna else "None")
-        
+        similar_qna = db.query(dto.qna.models.QnA).filter(dto.qna.models.QnA.id == similar_question_id).first()
+        print(">>> similar_question: ", similar_qna.question if similar_qna else "None")
+        print(">>> similar_answer: ", similar_qna.answer if similar_qna else "None")
+
         # 유사 질문에 대한 피드백이 없을 경우 None 반환
         expert_feedback = db.query(dto.feedback.expert.models.ExpertFeedback).filter(dto.feedback.expert.models.ExpertFeedback.qna_id == similar_question_id).first()
         questioner_feedback = db.query(dto.feedback.questioner.models.QuestionerFeedback).filter(dto.feedback.questioner.models.QuestionerFeedback.qna_id == similar_question_id).first()
         
-        
-            
-        
         print(">>> expert_feedback: ", expert_feedback.feedback if expert_feedback else "None")
         print(">>> questioner_feedback: ", questioner_feedback.feedback if questioner_feedback else "None")
     
-    similarAns = None
+    similar_answer = None
     expertFeedback = None
     
     if questioner_feedback and questioner_feedback.feedback > 3:
-        similarAns = qna.answer
+        similar_answer = similar_qna.answer
     
     if expert_feedback:
         expertFeedback = expert_feedback.feedback
+
     # GPT 답변 생성
-    answer = get_gpt_answer_by_precedent(Question.question, similar_precedent, similarity, expertFeedback, similarAns)
+    answer = get_gpt_answer_by_precedent(Question.question, similar_precedent, similarity, expertFeedback, similar_answer)
     gpt_time = time.time()
     print("GPT 답변 생성 시간:", gpt_time - search_time)
     
