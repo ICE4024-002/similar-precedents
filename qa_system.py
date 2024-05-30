@@ -63,6 +63,7 @@ def get_gpt_answer_by_precedent(question, similar_precedent, similarity, expert_
             expert_evaluation = f"""
             Here's what our experts have to say about similar questions.
             Please refer to them to generate your answer.
+            However, you should not comment directly on the answer.
             Expert Feedback: {expert_feedback}
             """
         else:
@@ -73,6 +74,7 @@ def get_gpt_answer_by_precedent(question, similar_precedent, similarity, expert_
             questioner_evaluation = f"""
             Here's an example answer to a similar question.
             Please refer to answer when answering.
+            However, you should not comment directly on the answer.
             example answer: {questioner_feedback}
             """
         else:
@@ -93,7 +95,7 @@ def get_gpt_answer_by_precedent(question, similar_precedent, similarity, expert_
 
         chat_completion = client.chat.completions.create(
             messages=messages_list,
-            model="gpt-3.5-turbo",
+            model="gpt-4o",
             temperature=0
         )
 
@@ -115,7 +117,7 @@ def regenerate_gpt_answer(question):
 
         chat_completion = client.chat.completions.create(
             messages=messages_list,
-            model="gpt-3.5-turbo",
+            model="gpt-4o",
             temperature=0
         )
 
