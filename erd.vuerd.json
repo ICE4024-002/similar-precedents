@@ -3,8 +3,8 @@
     "version": "2.2.13",
     "width": 2000,
     "height": 2000,
-    "scrollTop": -84.42060000000001,
-    "scrollLeft": -252.31259999999997,
+    "scrollTop": -126.98509999999999,
+    "scrollLeft": -239.1110032902467,
     "zoomLevel": 0.9,
     "show": {
       "tableComment": true,
@@ -121,7 +121,7 @@
           "active": false,
           "left": 410.8289,
           "top": 223.9503,
-          "zIndex": 1,
+          "zIndex": 3,
           "widthName": 60,
           "widthComment": 60
         },
@@ -206,7 +206,7 @@
           "active": false,
           "left": 1031.94,
           "top": 107.3953,
-          "zIndex": 3,
+          "zIndex": 2,
           "widthName": 91.25788879394531,
           "widthComment": 61.64396667480469
         },
@@ -291,9 +291,156 @@
           "active": false,
           "left": 1019.8291,
           "top": 317.5064,
-          "zIndex": 2,
+          "zIndex": 1,
           "widthName": 114.17684936523438,
           "widthComment": 61.64396667480469
+        },
+        "visible": true
+      },
+      {
+        "id": "8af9a758-9265-4472-9eb1-4659dfbb7187",
+        "name": "question_vector",
+        "comment": "",
+        "columns": [
+          {
+            "id": "c81da0a1-1b0d-4c26-bd47-66bdde4fc72e",
+            "name": "id",
+            "comment": "",
+            "dataType": "BIGINT",
+            "default": "",
+            "option": {
+              "autoIncrement": false,
+              "primaryKey": true,
+              "unique": false,
+              "notNull": true
+            },
+            "ui": {
+              "active": false,
+              "pk": true,
+              "fk": false,
+              "pfk": false,
+              "widthName": 60,
+              "widthComment": 60,
+              "widthDataType": 60,
+              "widthDefault": 60
+            }
+          },
+          {
+            "id": "14083298-4c1b-4a4d-a5ab-2bcc94db11ac",
+            "name": "embedding",
+            "comment": "",
+            "dataType": "VECTOR(768)",
+            "default": "",
+            "option": {
+              "autoIncrement": false,
+              "primaryKey": false,
+              "unique": false,
+              "notNull": true
+            },
+            "ui": {
+              "active": false,
+              "pk": false,
+              "fk": false,
+              "pfk": false,
+              "widthName": 63.19093322753906,
+              "widthComment": 60,
+              "widthDataType": 76.85391235351562,
+              "widthDefault": 60
+            }
+          },
+          {
+            "id": "da173885-5da6-4fd0-933c-54d78fd908eb",
+            "name": "question_id",
+            "comment": "",
+            "dataType": "INT",
+            "default": "",
+            "option": {
+              "autoIncrement": false,
+              "primaryKey": false,
+              "unique": false,
+              "notNull": true
+            },
+            "ui": {
+              "active": false,
+              "pk": false,
+              "fk": true,
+              "pfk": false,
+              "widthName": 63.645904541015625,
+              "widthComment": 60,
+              "widthDataType": 60,
+              "widthDefault": 60
+            }
+          }
+        ],
+        "ui": {
+          "active": false,
+          "left": 401.3123,
+          "top": 526.7535,
+          "zIndex": 4,
+          "widthName": 88.46287536621094,
+          "widthComment": 60
+        },
+        "visible": true
+      },
+      {
+        "id": "717eabcf-c623-4ffd-a3ed-2dbb10cca1d4",
+        "name": "precedents",
+        "comment": "",
+        "columns": [
+          {
+            "id": "7ae6f3aa-974b-4a22-b42e-763abc0dad4c",
+            "name": "id",
+            "comment": "",
+            "dataType": "BIGINT",
+            "default": "",
+            "option": {
+              "autoIncrement": false,
+              "primaryKey": true,
+              "unique": false,
+              "notNull": true
+            },
+            "ui": {
+              "active": false,
+              "pk": true,
+              "fk": false,
+              "pfk": false,
+              "widthName": 60,
+              "widthComment": 60,
+              "widthDataType": 60,
+              "widthDefault": 60
+            }
+          },
+          {
+            "id": "071661ec-21dc-4641-9184-151242416692",
+            "name": "embedding",
+            "comment": "",
+            "dataType": "VECTOR(768)",
+            "default": "",
+            "option": {
+              "autoIncrement": false,
+              "primaryKey": false,
+              "unique": false,
+              "notNull": true
+            },
+            "ui": {
+              "active": false,
+              "pk": false,
+              "fk": false,
+              "pfk": false,
+              "widthName": 63.19093322753906,
+              "widthComment": 60,
+              "widthDataType": 76.85391235351562,
+              "widthDefault": 60
+            }
+          }
+        ],
+        "ui": {
+          "active": true,
+          "left": 409,
+          "top": 47.7783,
+          "zIndex": 6,
+          "widthName": 62.93092346191406,
+          "widthComment": 60
         },
         "visible": true
       }
@@ -355,6 +502,32 @@
           "direction": "left"
         },
         "constraintName": "fk_qna_to_questioner_feedback",
+        "visible": true
+      },
+      {
+        "id": "65758039-f3c5-4932-ab1f-84032d054cc2",
+        "identification": false,
+        "relationshipType": "OneOnly",
+        "startRelationshipType": "Dash",
+        "start": {
+          "tableId": "56578185-beb7-41a4-9e1d-27c26f2cf21f",
+          "columnIds": [
+            "b6fc5d2c-3493-44d6-a7c0-ca32c36a6665"
+          ],
+          "x": 584.3289,
+          "y": 354.45029999999997,
+          "direction": "bottom"
+        },
+        "end": {
+          "tableId": "8af9a758-9265-4472-9eb1-4659dfbb7187",
+          "columnIds": [
+            "da173885-5da6-4fd0-933c-54d78fd908eb"
+          ],
+          "x": 585.0622084472657,
+          "y": 526.7535,
+          "direction": "top"
+        },
+        "constraintName": "fk_qna_to_question_vector",
         "visible": true
       }
     ]
