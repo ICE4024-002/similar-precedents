@@ -2,4 +2,5 @@ venv
 .env
 .env.local
 *.csv
+*.tsv
 __pycache__/
