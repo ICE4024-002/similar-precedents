@@ -1,5 +1,4 @@
 import torch
-from embedding import create_embeddings
 
 # 코사인 유사도
 def cal_cosine(a, b):
@@ -52,19 +51,3 @@ def cal_jaccard(str1, str2):
     
     
     return jaccard_similarity * 100
-
-sentences = [
-    ('한 남자가 음식을 먹고 있다.', '한 남자가 뭔가를 먹고 있다.'),
-    ('한 비행기가 착륙하고 있다.', '애니메이션화된 비행기 하나가 착륙하고 있다.'),
-    ('한 여성이 고기를 요리하고 있다.', '한 남자가 말하고 있다.')
-    ]
-
-senetece_vectors = [(create_embeddings(sen[0]), create_embeddings(sen[1])) for sen in sentences]
-
-for i in range(0, 3):
-    print(f'문장 쌍: {sentences[i]}')
-    print(f'코사인 유사도: {cal_cosine(senetece_vectors[i][0], senetece_vectors[i][1]).item()}')
-    print(f'유클리디안 유사도: {cal_euclidean(senetece_vectors[i][0], senetece_vectors[i][1])}')
-    print(f'피어슨 유사도: {cal_pearson(senetece_vectors[i][0], senetece_vectors[i][1]).item()}')
-    print(f'자카드 유사도: {cal_jaccard(sentences[i][0], sentences[i][1])}')
-    print()
