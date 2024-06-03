@@ -111,7 +111,7 @@ def get_gpt_answer(Question: dto.question.schemas.Question, db: Session = Depend
         expertFeedback = expert_feedback.feedback
 
     # GPT 답변 생성
-    answer = get_gpt_answer_by_precedent(Question.question, similar_precedent, similarity, expertFeedback, similar_answer)
+    answer, prompt = get_gpt_answer_by_precedent(Question.question, similar_precedent, similarity, expertFeedback, similar_answer)
     gpt_time = time.time()
     print("GPT 답변 생성 시간:", gpt_time - search_time)
     
@@ -119,7 +119,7 @@ def get_gpt_answer(Question: dto.question.schemas.Question, db: Session = Depend
     g_eval_score = calculate_g_eval_score(Question.question, answer)
     if evaluate_scores(g_eval_score):
         print(">>> G-EVAL 점수 충족 X !!!")
-        answer = regenerate_gpt_answer(Question.question)
+        answer, prompt = regenerate_gpt_answer(Question.question)
     g_eval_time = time.time()
     print("G-EVAL 점수 계산 및 미충족 시 재생성 시간:", g_eval_time - gpt_time)
     
@@ -140,7 +140,7 @@ def get_gpt_answer(Question: dto.question.schemas.Question, db: Session = Depend
     total_time = db_embedding_time - start_time
     print("전체 실행 시간:", total_time)
     
-    return { "id": qna.id, "answer": answer, "similarity": similarity, "precedent": similar_precedent }
+    return { "id": qna.id, "answer": answer, "similarity": similarity, "precedent": similar_precedent, "prompt": prompt }
 
 
 # 전문가의 피드백이 없는 QnA 목록을 반환하는 API
