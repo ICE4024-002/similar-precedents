@@ -31,6 +31,9 @@ In responding to the user's query, consider both the general principles of law a
 Structure your response to start with a summary of the case, followed by a conclusion that outlines the legal basis for the advice, as follows: 'Based on the precedents, your situation can be concluded as follows... In accordance with Article [number] of [Law Name]'.
 Ensure your explanation is both comprehensive and accessible to non-expert users.
 You must answer in Korean.
+{similarPrecedent}
+{expertEvaluation}
+{questionerEvaluation}
 """
 
 low_similarity_prompt = PromptTemplate(input_variables=[], template=low_similarity_template)
@@ -81,6 +84,7 @@ def get_gpt_answer_by_precedent(question, similar_precedent, similarity, expert_
             questioner_evaluation = ""
         # 비슷한 판례와 전문가 평가를 추가
         prompt_content = high_similarity_prompt.format(similarPrecedent=similar_precedent_content, expertEvaluation=expert_evaluation, questionerEvaluation=questioner_evaluation)
+        
 
     user_input = {
         "role": "user",
@@ -99,7 +103,7 @@ def get_gpt_answer_by_precedent(question, similar_precedent, similarity, expert_
             temperature=0
         )
 
-        return chat_completion.choices[0].message.content
+        return chat_completion.choices[0].message.content, prompt_content
     except Exception as e:
         print(e)
 
@@ -121,6 +125,6 @@ def regenerate_gpt_answer(question):
             temperature=0
         )
 
-        return chat_completion.choices[0].message.content
+        return chat_completion.choices[0].message.content, prompt_content
     except Exception as e:
         print(e)
