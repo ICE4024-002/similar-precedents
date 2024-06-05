@@ -134,6 +134,9 @@ def get_gpt_answer(Question: dto.question.schemas.Question, db: Session = Depend
     question_vector_float = [tensor.item() for tensor in question_vector]
     if similarity >= 65:
         add_embedding_to_db(qna.id, question_vector_float, "question_vector", db)
+    
+    app.state.question_embeddings = load_question_embeddings()
+
     db_embedding_time = time.time()
     print("질문 벡터 DB 저장 시간:", db_embedding_time - db_save_time)
     
