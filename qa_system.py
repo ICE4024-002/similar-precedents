@@ -45,10 +45,14 @@ def get_gpt_answer_by_precedent(question, similar_precedent, similarity, expert_
     print(">>> questioner_feedback: ")
     print(questioner_feedback)
     
+    prompt_dict = {}
     print("end")
     if similarity < similarity_threshold:
         prompt_content = low_similarity_prompt.format()
+        prompt_dict["base_prompt"] = low_similarity_template
     else:
+        prompt_dict["base_prompt"] = high_similarity_template
+        
         similar_precedent_content = f"""
         Here is a info of relevant case law:
             'caseName': {similar_precedent['사건명']},
@@ -61,6 +65,7 @@ def get_gpt_answer_by_precedent(question, similar_precedent, similarity, expert_
             'referencePrecedents': {similar_precedent['참조판례']},
             'fullText': {similar_precedent['전문']}
         """
+        prompt_dict["similar_precedent"] = similar_precedent_content
         
         if expert_feedback:
             expert_evaluation = f"""
@@ -71,6 +76,7 @@ def get_gpt_answer_by_precedent(question, similar_precedent, similarity, expert_
             """
         else:
             expert_evaluation = ""
+        prompt_dict["expert_evaluation"] = expert_evaluation
         
         if questioner_feedback: 
             print(questioner_feedback)
@@ -82,6 +88,8 @@ def get_gpt_answer_by_precedent(question, similar_precedent, similarity, expert_
             """
         else:
             questioner_evaluation = ""
+        prompt_dict["questioner_evaluation"] = questioner_evaluation
+
         # 비슷한 판례와 전문가 평가를 추가
         prompt_content = high_similarity_prompt.format(similarPrecedent=similar_precedent_content, expertEvaluation=expert_evaluation, questionerEvaluation=questioner_evaluation)
         
@@ -103,7 +111,7 @@ def get_gpt_answer_by_precedent(question, similar_precedent, similarity, expert_
             temperature=0
         )
 
-        return chat_completion.choices[0].message.content, prompt_content
+        return chat_completion.choices[0].message.content, prompt_dict
     except Exception as e:
         print(e)
 
