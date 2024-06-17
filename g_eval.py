@@ -12,12 +12,12 @@ client = OpenAI(
     api_key=open_api_key,
 )
 
-# 점수가 3점 미만인 항목을 반환
+# 점수가 4점 미만인 항목을 반환
 def evaluate_scores(scores):
     below_threshold = {}
     
     for category, score in scores.items():
-        if score < 3:
+        if score < 4:
             below_threshold[category] = score
             
     return below_threshold
