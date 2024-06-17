@@ -148,8 +148,11 @@ def get_gpt_answer(Question: dto.question.schemas.Question, db: Session = Depend
     
     total_time = db_embedding_time - start_time
     print("전체 실행 시간:", total_time)
+
+    similar_qna_dto = {"question": similar_qna.question, "answer": similar_qna.answer} if similar_qna else None
     
-    return { "id": qna.id, "answer": answer, "similarity": similarity, "precedent": similar_precedent, "prompt": prompt }
+    return { "id": qna.id, "answer": answer, "similarity": similarity, "precedent": similar_precedent, "prompt": prompt, 
+            "qna": similar_qna_dto }
 
 
 # 전문가의 피드백이 없는 QnA 목록을 반환하는 API
