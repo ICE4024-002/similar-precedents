@@ -117,15 +117,18 @@ def get_gpt_answer(Question: dto.question.schemas.Question, db: Session = Depend
     
     # 답변에 대한 G-EVAL 점수 계산
     g_eval_score = calculate_g_eval_score(Question.question, answer)
-    if evaluate_scores(g_eval_score):
+    g_eval_score_not_satisfied = evaluate_scores(g_eval_score)
+    print(">>> G-EVAL 점수: ", g_eval_score)
+    if g_eval_score_not_satisfied:
         print(">>> G-EVAL 점수 충족 X !!!")
         answer, prompt = regenerate_gpt_answer(Question.question)
     g_eval_time = time.time()
     print("G-EVAL 점수 계산 및 미충족 시 재생성 시간:", g_eval_time - gpt_time)
     
     # DB에 QA 저장
+    # 판례 유사도 65 이상, G-EVAL 점수 4점 이상
     qna = dto.qna.models.QnA(question=Question.question, answer=answer)
-    if similarity >= 65:
+    if similarity >= 65 and not g_eval_score_not_satisfied:
         add_and_commit(db, qna)
     db_save_time = time.time()
     print("DB 저장 시간:", db_save_time - g_eval_time)
